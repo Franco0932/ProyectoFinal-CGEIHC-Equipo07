@@ -3,12 +3,11 @@
 ## Equipo 07  
 
 ### Presentado por:
-- **Ruiz Godoy Franco**  
-
 - **Aquino Lozada Gabriela**  
 
 - **Romero Pizano Christian Gustavo**  
 
+- **Ruiz Godoy Franco**  
 ---
 
 ### Materia:
