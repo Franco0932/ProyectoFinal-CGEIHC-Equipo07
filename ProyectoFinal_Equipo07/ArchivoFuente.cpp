@@ -156,6 +156,8 @@ int main()
 	
 	Model Muros((char*)"Models/EstructuraBase.obj");
 	Model Bench((char*)"Models/Bench/Bench.obj");
+	Model PisoMadera((char*)"Models/Piso/PisoMadera.obj");
+
 
 
 
@@ -310,6 +312,11 @@ int main()
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Bench.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		PisoMadera.Draw(lightingShader);
 
 
 	
