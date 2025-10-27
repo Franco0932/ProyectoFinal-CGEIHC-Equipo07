@@ -246,6 +246,8 @@ int main()
 	Model PisoPatio((char*)"Models/Patio/Patio.obj");
 	Model PisoPasillo((char*)"Models/PisoPasillos/PisoPasillos.obj");
 	Model Skylight((char*)"Models/Tragaluz/Tragaluz.obj");
+	Model PuertasPrincipales((char*)"Models/PuertasPrincipales/PuertasPrincipales.obj");
+
 
 
 
@@ -430,17 +432,20 @@ int main()
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		PuertasPrincipales.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		glEnable(GL_BLEND);//Activa la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Skylight.Draw(lightingShader);
 
-		//model = glm::mat4(1);
-		////glEnable(GL_BLEND);//Activa la funcionalidad para trabajar el canal alfa
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//Skylight.Draw(lightingShader);
-		////glDisable(GL_BLEND);  //Desactiva el canal alfa 
-		//glBindVertexArray(0);
+		
+		glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
 
 
 		// Also draw the lamp object, again binding the appropriate shader

@@ -1,7 +1,7 @@
 # 3ds Max Wavefront OBJ Exporter v0.99 - (c)2007 guruware
-# File Created: 17.10.2025 13:58:25
+# File Created: 27.10.2025 11:57:31
 
-newmtl Material__31
+newmtl Material__57
 	Ns 10.0000
 	Ni 1.5000
 	d 1.0000
@@ -14,4 +14,3 @@ newmtl Material__31
 	Ke 0.0000 0.0000 0.0000
 	map_Ka Loseta.jpg
 	map_Kd Loseta.jpg
-	map_Ks SpecPasillo.png
