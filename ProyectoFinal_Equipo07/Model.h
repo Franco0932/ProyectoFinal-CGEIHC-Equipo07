@@ -27,7 +27,7 @@ class Model
 public:
 	/*  Functions   */
 	// Constructor, expects a filepath to a 3D model.
-	Model(GLchar *path)
+	Model(const std::string& path)
 	{
 		this->loadModel(path);
 	}
@@ -49,7 +49,7 @@ private:
 
 										/*  Functions   */
 										// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-	void loadModel(string path)
+	void loadModel(const std::string& path)
 	{
 		// Read file via ASSIMP
 		Assimp::Importer importer;
@@ -182,7 +182,7 @@ private:
 
 			for (GLuint j = 0; j < textures_loaded.size(); j++)
 			{
-				if (textures_loaded[j].path == str)
+				if (textures_loaded[j].path == std::string(str.C_Str()))
 				{
 					textures.push_back(textures_loaded[j]);
 					skip = true; // A texture with the same filepath has already been loaded, continue to next one. (optimization)
@@ -196,7 +196,7 @@ private:
 				Texture texture;
 				texture.id = TextureFromFile(str.C_Str(), this->directory);
 				texture.type = typeName;
-				texture.path = str;
+				texture.path = str.C_Str();
 				textures.push_back(texture);
 
 				this->textures_loaded.push_back(texture);  // Store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.

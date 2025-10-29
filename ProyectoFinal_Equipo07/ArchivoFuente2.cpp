@@ -24,6 +24,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include "Texture.h"
+#include "modelAnim.h"
 
 
 // Function prototypes
@@ -243,6 +244,8 @@ int main()
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 	Shader SkyBoxshader("Shader/SkyBox.vs", "Shader/SkyBox.frag");
+	Shader animShader("Shader/anim.vs", "Shader/anim.frag");
+
 
 	
 	//models
@@ -253,9 +256,15 @@ int main()
 	Model PisoPasillo((char*)"Models/PisoPasillos/PisoPasillos.obj");
 	Model Skylight((char*)"Models/Tragaluz/Tragaluz.obj");
 	Model PuertasPrincipales((char*)"Models/PuertasPrincipales/PuertasPrincipales.obj");
-	Model Niño((char*)"Models/Throw/Throw.dae");
 	Model Pasto((char*)"Models/Pasto/Pasto.obj");
 
+	//Modelos de Maximo
+	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
+	Niño.initShaders(animShader.Program);
+	ModelAnim Walk1((char*)"Models/Walking/Walking.dae");
+	Walk1.initShaders(animShader.Program);
+	/*ModelAnim Walk2((char*)"Models/Walk2/Throw.dae");
+	Walk2.initShaders(animShader.Program);*/
 
 
 	// First, set the container's VAO (and VBO)
@@ -415,11 +424,11 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		PisoPatio.Draw(lightingShader);
 
-		model = glm::mat4(1);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.008f, 0.008f, 0.008f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		//Niño.Draw(lightingShader);
+		//model = glm::mat4(1);
+		//model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		//model = glm::scale(model, glm::vec3(0.008f, 0.008f, 0.008f));
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		////Niño.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
@@ -448,6 +457,42 @@ int main()
 
 
 		glBindVertexArray(0);
+
+
+		/*_______________________________Personaje Animado___________________________*/
+		animShader.Use();
+		modelLoc = glGetUniformLocation(animShader.Program, "model");
+		viewLoc = glGetUniformLocation(animShader.Program, "view");
+		projLoc = glGetUniformLocation(animShader.Program, "projection");
+
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+		glUniform3f(glGetUniformLocation(animShader.Program, "material.specular"), 0.5f, 0.5f, 0.5f);
+		glUniform1f(glGetUniformLocation(animShader.Program, "material.shininess"), 32.0f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.ambient"), 0.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.diffuse"), 0.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.specular"), 0.5f, 0.5f, 0.5f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.direction"), 0.0f, -1.0f, -1.0f);
+		view = camera.GetViewMatrix();
+
+		model = glm::mat4(1);
+		//model = glm::translate(model, glm::vec3(PosIni.x + 5.0f, PosIni.y - 1.0f, PosIni.z));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.008f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Niño.Draw(animShader);
+		glBindVertexArray(0);
+
+
+		model = glm::mat4(1);
+		//model = glm::translate(model, glm::vec3(PosIni.x + 8.0f, PosIni.y - 4.0f, PosIni.z));
+		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 2.0f));
+		model = glm::scale(model, glm::vec3(0.008f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Walk1.Draw(animShader);
+		glBindVertexArray(0);
+
 
 		//model = glm::mat4(1);
 		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa

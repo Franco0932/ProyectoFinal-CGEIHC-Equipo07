@@ -27,13 +27,15 @@ struct Vertex
 	glm::vec3 Normal;
 	// TexCoords
 	glm::vec2 TexCoords;
+	glm::vec3 Tangent;   
+	glm::vec3 Bitangent; 
 };
 
 struct Texture
 {
 	GLuint id;
-	string type;
-	aiString path;
+	std::string type;
+	std::string path;
 };
 
 class Mesh
