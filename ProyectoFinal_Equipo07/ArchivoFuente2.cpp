@@ -194,6 +194,10 @@ glm::vec3 dogPos (0.0f,0.0f,0.0f);
 float dogRot = 0.0f;
 bool step = false;
 
+//vuelo de los pajaros y el avion
+float anguloVuelo = 0.0f; // recorrido
+float radioVuelo = 8.0f; // que tan amplio se recorre
+glm::vec3 centroVuelo = glm::vec3(2.0f, 8.0f, 0.0f);
 
 
 // Deltatime
@@ -265,6 +269,12 @@ int main()
 	Model Pasto((char*)"Models/Pasto/Pasto.obj");
 	Model Baseball((char*)"Models/Baseball/Baseball.obj");
 
+	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
+	Birds.initShaders(animShader.Program);
+
+	ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
+	Bat.initShaders(animShader.Program);
+
 	//Modelos de Maximo
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
 	Niño.initShaders(animShader.Program);
@@ -272,6 +282,8 @@ int main()
 	Walk1.initShaders(animShader.Program);
 	/*ModelAnim Walk2((char*)"Models/Walk2/Throw.dae");
 	Walk2.initShaders(animShader.Program);*/
+
+
 
 
 	// First, set the container's VAO (and VBO)
@@ -472,8 +484,10 @@ int main()
 		glBindVertexArray(0);
 
 
-		/*_______________________________Personaje Animado___________________________*/
+		/*_______________________________Personaje Animado__________________1_________*/
 		animShader.Use();
+		//glDisable(GL_CULL_FACE);
+
 		modelLoc = glGetUniformLocation(animShader.Program, "model");
 		viewLoc = glGetUniformLocation(animShader.Program, "view");
 		projLoc = glGetUniformLocation(animShader.Program, "projection");
@@ -481,10 +495,11 @@ int main()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+
 		glUniform3f(glGetUniformLocation(animShader.Program, "material.specular"), 0.5f, 0.5f, 0.5f);
 		glUniform1f(glGetUniformLocation(animShader.Program, "material.shininess"), 32.0f);
-		glUniform3f(glGetUniformLocation(animShader.Program, "light.ambient"), 0.0f, 1.0f, 1.0f);
-		glUniform3f(glGetUniformLocation(animShader.Program, "light.diffuse"), 0.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.ambient"), 0.6f, 0.6f, 0.6f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.diffuse"), 0.06, 0.6f, 0.6f);
 		glUniform3f(glGetUniformLocation(animShader.Program, "light.specular"), 0.5f, 0.5f, 0.5f);
 		glUniform3f(glGetUniformLocation(animShader.Program, "light.direction"), 0.0f, -1.0f, -1.0f);
 		view = camera.GetViewMatrix();
@@ -506,6 +521,18 @@ int main()
 		Walk1.Draw(animShader);
 		glBindVertexArray(0);
 
+		model = glm::mat4(1);
+		glm::vec3 nuevaPos = glm::vec3((centroVuelo.x + radioVuelo * cos(anguloVuelo))/2, centroVuelo.y, (centroVuelo.z + radioVuelo * sin(anguloVuelo)));
+		model = glm::translate(model, nuevaPos);
+		model = glm::scale(model, glm::vec3(0.018f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // volteamos
+		model = glm::rotate(model, -anguloVuelo + glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // rotacion
+		model = glm::rotate(model, glm::radians(15.0f * sin(anguloVuelo * 4.0f)), glm::vec3(1.0f, 0.0f, 0.1f)); // rotacion de inclinacion
+		glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(model));
+		Birds.Draw(animShader);
+		glBindVertexArray(0);
+
+		//glEnable(GL_CULL_FACE);
 
 		//model = glm::mat4(1);
 		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
@@ -686,6 +713,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	
 }
 void Animation() {
+	anguloVuelo += 0.4f * deltaTime;
 	if (AnimBall)
 	{
 		rotBall += 0.4f;
