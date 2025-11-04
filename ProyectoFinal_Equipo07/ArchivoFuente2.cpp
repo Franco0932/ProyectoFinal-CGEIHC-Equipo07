@@ -25,6 +25,9 @@
 #include "Model.h"
 #include "Texture.h"
 #include "modelAnim.h"
+//Audio
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
 
 
 // Function prototypes
@@ -38,7 +41,7 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera  camera(glm::vec3(0.0f, 5.0f, 3.0f));
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
@@ -60,6 +63,11 @@ float	g = 9.81f, v = 12.0f, ang = 12.0f, t = 45.0f, orientacionBaseball = 0.0f, 
 double	n = 3.1416;
 float	i = 0.0f;
 bool animBaseball = false;
+
+//Throw sincronizado (niño + pelota) ---
+bool playingThrow = false;
+float throwTime = 0.0f;
+const float throwLaunchOffset = 0.0f;
 
 float vertices[] = {
 	 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -178,6 +186,10 @@ glm::vec3 cubePositions[] = {
 	glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
+// Audio
+ma_engine gAudio;          // motor global
+bool gAudioReady = false;  // bandera
+
 
 glm::vec3 Light1 = glm::vec3(0);
 //Anim
@@ -198,6 +210,58 @@ bool step = false;
 float anguloVuelo = 0.0f; // recorrido
 float radioVuelo = 8.0f; // que tan amplio se recorre
 glm::vec3 centroVuelo = glm::vec3(2.0f, 8.0f, 0.0f);
+
+
+//Walk1
+bool walk1Run = true;
+glm::vec3 walk1Origin = glm::vec3(-3.5f, 0.0f, -12.5f); // donde ya lo dibujabas
+
+glm::vec3 walk1Pos(0.0f);
+float     walk1Yaw = 90.0f; // 0°=+Z, +90°=+X (arranca mirando +X)
+
+// Tamaño del rectángulo (ajústalos a tu gusto)
+float W1_W = 16.0f; 
+float W1_D = 3.0f; 
+
+// Waypoints del rectángulo, relativos al origin
+glm::vec3 walk1Pts[4] = {
+	glm::vec3(W1_W, 0.0f,   0.0f),   // 1) +X (va al costado)
+	glm::vec3(W1_W, 0.0f, +W1_D),   // 2) +Z (frente del escenario)
+	glm::vec3(0.0f,  0.0f, +W1_D),  // 3) -X (cruza hacia el otro lado)
+	glm::vec3(0.0f,  0.0f,  0.0f)   // 4) -Z (regresa al origen)
+};
+int   walk1Wp = 0;
+float walk1Speed = 1.3f;     // u/s (velocidad de caminar)
+float walk1TurnSpeed = 120.0f;   // °/s (qué tan rápido gira)
+float walk1ArriveEps = 0.05f;    // umbral para "llegó" al punto
+float walk1FaceEps = 2.0f;     // cuán alineado debe estar para avanzar
+
+
+
+//Walk2
+bool walk2Run = true;
+glm::vec3 walk2Origin = glm::vec3(7.0f, 0.0f, 6.0f); // donde lo colocas en escena
+
+glm::vec3 walk2Pos(0.0f); // posición relativa al origin
+float     walk2Yaw = 0.0f; // 0° = +Z
+
+const float W2_LIM = 2.25f;
+const float W2_M = 0.03f;
+
+glm::vec3 walk2Pts[6] = {
+	glm::vec3(0.0f,   0.0f,   3.0f), 
+	glm::vec3(-15.5f,   0.0f,   3.0f),  
+	glm::vec3(-15.5f,   0.0f, -15.0f),
+	glm::vec3(2.5f,   0.0f, -15.0f),  
+	glm::vec3(2.5f,   0.0f, 1.5f),   
+	glm::vec3(0.0f,   0.0f, 0.0f), 
+};
+
+int   walk2Wp = 0;
+float walk2Speed = 0.9f;    // u/s
+float walk2TurnSpeed = 120.0f;  // °/s
+float walk2ArriveEps = 0.04f;   // llegó
+float walk2FaceEps = 2.0f;    // “casi” alineado
 
 
 // Deltatime
@@ -269,19 +333,18 @@ int main()
 	Model Pasto((char*)"Models/Pasto/Pasto.obj");
 	Model Baseball((char*)"Models/Baseball/Baseball.obj");
 
-	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
-	Birds.initShaders(animShader.Program);
-
-	ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
-	Bat.initShaders(animShader.Program);
-
-	//Modelos de Maximo
+	//Modelos de Miximo
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
 	Niño.initShaders(animShader.Program);
 	ModelAnim Walk1((char*)"Models/Walking/Walking.dae");
 	Walk1.initShaders(animShader.Program);
-	/*ModelAnim Walk2((char*)"Models/Walk2/Throw.dae");
-	Walk2.initShaders(animShader.Program);*/
+	ModelAnim Walk2((char*)"Models/Walking2/Walking.dae");
+	Walk2.initShaders(animShader.Program);
+
+	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
+	Birds.initShaders(animShader.Program);
+	ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
+	Bat.initShaders(animShader.Program);
 
 
 
@@ -327,6 +390,34 @@ int main()
 	GLuint cubemapTexture = TextureLoading::LoadCubemap(faces);
 
 	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 100.0f);
+
+	// Inicializar audio
+	if (ma_engine_init(NULL, &gAudio) == MA_SUCCESS) {
+		gAudioReady = true;
+	}
+	else {
+		std::cerr << "No se pudo inicializar miniaudio.\n";
+	}
+
+	// Walk1
+	walk1Pos = glm::vec3(0.0f);
+	{
+		glm::vec3 toT = walk1Pts[0] - walk1Pos;
+		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
+		walk1Yaw = desiredYaw;  
+		walk1Wp = 0;
+		walk1Run = true;
+	}
+
+	// Walk2
+	walk2Pos = glm::vec3(0.0f);
+	{
+		glm::vec3 toT = walk2Pts[0] - walk2Pos;
+		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
+		walk2Yaw = desiredYaw;
+		walk2Wp = 0;
+		walk2Run = true;
+	}
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -443,12 +534,6 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		PisoPatio.Draw(lightingShader);
 
-		//model = glm::mat4(1);
-		//model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		//model = glm::scale(model, glm::vec3(0.008f, 0.008f, 0.008f));
-		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		////Niño.Draw(lightingShader);
-
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -470,8 +555,13 @@ int main()
 		Skylight.Draw(lightingShader);
 
 		model = glm::mat4(1);
+		glEnable(GL_BLEND);//Activa la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glDisable(GL_BLEND);  //Desactiva el canal alfa 
 		PuertasPrincipales.Draw(lightingShader);
 
 		model = glm::mat4(1);
@@ -510,16 +600,24 @@ int main()
 		model = glm::scale(model, glm::vec3(0.008f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Niño.Draw(animShader);
-		glBindVertexArray(0);
 
 
 		model = glm::mat4(1);
-		//model = glm::translate(model, glm::vec3(PosIni.x + 8.0f, PosIni.y - 4.0f, PosIni.z));
-		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 2.0f));
+		model = glm::translate(model, walk1Origin + walk1Pos);
+		model = glm::rotate(model, glm::radians(walk1Yaw), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.008f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Walk1.Draw(animShader);
+
+
+		model = glm::mat4(1);
+		model = glm::translate(model, walk2Origin + walk2Pos);
+		model = glm::rotate(model, glm::radians(walk2Yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.008f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Walk2.Draw(animShader);
 		glBindVertexArray(0);
+
 
 		model = glm::mat4(1);
 		glm::vec3 nuevaPos = glm::vec3((centroVuelo.x + radioVuelo * cos(anguloVuelo))/2, centroVuelo.y, (centroVuelo.z + radioVuelo * sin(anguloVuelo)));
@@ -594,7 +692,9 @@ int main()
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
 
-
+	if (gAudioReady) {
+		ma_engine_uninit(&gAudio);
+	}
 
 	return 0;
 }
@@ -657,6 +757,10 @@ void DoMovement()
 	{
 		pointLightPositions[0].z += 0.01f;
 	}
+	if (keys[GLFW_KEY_K]) walk2Run = !walk2Run;
+	if (keys[GLFW_KEY_L]) walk1Run = !walk1Run; 
+
+
 	
 }
 
@@ -693,22 +797,52 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 			Light1 = glm::vec3(0);
 		}
 	}
-	if (keys[GLFW_KEY_N])
-	{
-		AnimBall = !AnimBall;
-		
-	}
-
-	if (keys[GLFW_KEY_B]) {
-
-		dogAnim = 1;
-
-	}
-
 	if (keys[GLFW_KEY_P]) {
 
 		animBaseball ^= true;
 
+	}
+	if (keys[GLFW_KEY_R]) {
+		walk2Pos = glm::vec3(0.0f);
+		walk2Yaw = 0.0f;   // o cualquier otro para ver el primer giro suave
+		walk2Wp = 0;
+		walk2Run = true;
+	}
+	if (keys[GLFW_KEY_O]) {
+		walk1Pos = glm::vec3(0.0f);
+		walk1Yaw = 90.0f; // mirando +X
+		walk1Wp = 0;
+		walk1Run = true;
+	}
+	if (keys[GLFW_KEY_Z]) {
+		if (gAudioReady) {
+			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+		}
+	}
+	if (keys[GLFW_KEY_X]) {
+		if (gAudioReady) {
+			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+		}
+	}
+	if (keys[GLFW_KEY_C]) {
+		if (gAudioReady) {
+			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+		}
+	}
+	if (keys[GLFW_KEY_V]) {
+		if (gAudioReady) {
+			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+		}
+	}
+	if (keys[GLFW_KEY_B]) {
+		if (gAudioReady) {
+			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+		}
+	}
+	if (keys[GLFW_KEY_N]) {
+		if (gAudioReady) {
+			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+		}
 	}
 	
 }
@@ -717,42 +851,89 @@ void Animation() {
 	if (AnimBall)
 	{
 		rotBall += 0.4f;
-		//printf("%f", rotBall);
 	}
-	
-	if (AnimDog)
-	{
-		rotDog -= 0.6f;
-		//printf("%f", rotBall);
-	}
-	
-	if (dogAnim == 1) {      //Walk Animation
 
-		if (!step) {          //State 1
-			RLegs += 0.3f;
-			FLegs += 0.3f;
-			head += 0.3f;
-			tail += 0.3f;
+	// -------- Walk1 path (rectángulo, giro progresivo) --------
+	if (walk1Run) {
+		glm::vec3 target = walk1Pts[walk1Wp];
+		glm::vec3 toT = target - walk1Pos;
+		float distXZ = glm::length(glm::vec2(toT.x, toT.z));
 
-			if (RLegs > 15.0f)    //Condition
-				step = true;
-		}
-		else {
+		// Yaw deseado (0°=+Z, +90°=+X)
+		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
 
-			RLegs -= 0.3f;
-			FLegs -= 0.3f;
-			head -= 0.3f;
-			tail -= 0.3f;
+		// Diferencia angular mínima en [-180,180]
+		float diff = desiredYaw - walk1Yaw;
+		while (diff > 180.0f)  diff -= 360.0f;
+		while (diff < -180.0f) diff += 360.0f;
 
-			if (RLegs < -15.0f)    //Condition
-				step = false;
+		// Giro progresivo
+		float maxStep = walk1TurnSpeed * deltaTime;
+		if (std::abs(diff) > maxStep) walk1Yaw += (diff > 0 ? maxStep : -maxStep);
+		else                          walk1Yaw = desiredYaw;
 
+		// Avanza si ya está casi alineado
+		if (std::abs(diff) < walk1FaceEps) {
+			float yaw = glm::radians(walk1Yaw);
+			glm::vec3 fwd(std::sin(yaw), 0.0f, std::cos(yaw));
+			walk1Pos += fwd * (walk1Speed * deltaTime);
 		}
 
-		if (dogPos.z < 2.25f) {
-			dogPos.z += 0.0007;
+		// ¿Llegó al waypoint?
+		if (distXZ < walk1ArriveEps) {
+			int prev = walk1Wp;
+			walk1Wp = (walk1Wp + 1) % 4;
+
+			// Cerró el lazo: limpia drift y normaliza yaw
+			if (prev == 3 && walk1Wp == 0) {
+				walk1Pos = glm::vec3(0.0f);
+				while (walk1Yaw > 180.0f)  walk1Yaw -= 360.0f;
+				while (walk1Yaw < -180.0f) walk1Yaw += 360.0f;
+			}
 		}
 	}
+
+
+	// -------- Walk2 path (con giro progresivo) --------
+	if (walk2Run) {
+		glm::vec3 target = walk2Pts[walk2Wp];
+		glm::vec3 toT = target - walk2Pos;
+		float distXZ = glm::length(glm::vec2(toT.x, toT.z));
+
+		// Yaw deseado hacia el objetivo (0°=+Z, +90°=+X)
+		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
+
+		// Diferencia angular mínima en [-180,180]
+		float diff = desiredYaw - walk2Yaw;
+		while (diff > 180.0f) diff -= 360.0f;
+		while (diff < -180.0f) diff += 360.0f;
+
+		// Giro progresivo limitado por turnSpeed
+		float maxStep = walk2TurnSpeed * deltaTime;
+		if (std::abs(diff) > maxStep) walk2Yaw += (diff > 0 ? maxStep : -maxStep);
+		else                          walk2Yaw = desiredYaw;
+
+		// Avanza solo si está casi alineado
+		if (std::abs(diff) < walk2FaceEps) {
+			float yaw = glm::radians(walk2Yaw);
+			glm::vec3 fwd(std::sin(yaw), 0.0f, std::cos(yaw));
+			walk2Pos += fwd * (walk2Speed * deltaTime);
+		}
+
+		// ¿Llegó?
+		if (distXZ < walk2ArriveEps) {
+			int prev = walk2Wp;
+			walk2Wp = (walk2Wp + 1) % 6;
+
+			if (prev == 5 && walk2Wp == 0) {
+				walk2Pos = glm::vec3(0.0f);
+				while (walk2Yaw > 180.0f)  walk2Yaw -= 360.0f;
+				while (walk2Yaw < -180.0f) walk2Yaw += 360.0f;
+			}
+
+		}
+	}
+
 
 	if (animBaseball)
 	{
