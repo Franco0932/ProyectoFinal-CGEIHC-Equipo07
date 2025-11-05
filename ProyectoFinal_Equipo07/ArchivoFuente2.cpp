@@ -276,6 +276,22 @@ int main()
 	Bat.initShaders(animShader.Program);
 
 	//Modelos de Maximo
+
+	//Pinturas
+	//Pinturas
+	Model Pintura1((char*)"Models/Pinturas/Pintura1.obj");
+	Model Pintura2((char*)"Models/Pinturas/Pintura2.obj");
+	Model Pintura3((char*)"Models/Pinturas/Pintura3.obj");
+	Model Pintura4((char*)"Models/Pinturas/Pintura4.obj");
+	Model Pintura5((char*)"Models/Pinturas/Pintura5.obj");
+	Model Pintura6((char*)"Models/Pinturas/Pintura6.obj");
+	Model Pintura7((char*)"Models/Pinturas/Pintura7.obj");
+	Model Pintura8((char*)"Models/Pinturas/Pintura8.obj");
+	Model Pintura9((char*)"Models/Pinturas/Pintura9.obj");
+	Model Pintura10((char*)"Models/Pinturas/Pintura10.obj");
+	Model Pintura11((char*)"Models/Pinturas/Pintura11.obj");
+	//Modelos de Miximo
+
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
 	Niño.initShaders(animShader.Program);
 	ModelAnim Walk1((char*)"Models/Walking/Walking.dae");
@@ -480,6 +496,37 @@ int main()
 		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Baseball.Draw(lightingShader);
+
+		//Pinturas Sala 1
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 1.7f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura1.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(2.8f, 0.5f, 1.7f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura7.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 1.7f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura10.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 1.7f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura11.Draw(lightingShader);
+
+		/*model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 0.7f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura8.Draw(lightingShader);*/
 
 		glBindVertexArray(0);
 
