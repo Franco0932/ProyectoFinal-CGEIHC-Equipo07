@@ -275,9 +275,6 @@ int main()
 	ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
 	Bat.initShaders(animShader.Program);
 
-	//Modelos de Maximo
-
-	//Pinturas
 	//Pinturas
 	Model Pintura1((char*)"Models/Pinturas/Pintura1.obj");
 	Model Pintura2((char*)"Models/Pinturas/Pintura2.obj");
@@ -290,6 +287,7 @@ int main()
 	Model Pintura9((char*)"Models/Pinturas/Pintura9.obj");
 	Model Pintura10((char*)"Models/Pinturas/Pintura10.obj");
 	Model Pintura11((char*)"Models/Pinturas/Pintura11.obj");
+
 	//Modelos de Miximo
 
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
