@@ -297,8 +297,28 @@ int main()
 	/*ModelAnim Walk2((char*)"Models/Walk2/Throw.dae");
 	Walk2.initShaders(animShader.Program);*/
 
+	//Pinturas Sala1
+	Model Pintura1((char*)"Models/Pinturas/Pintura1.obj");
+	Model Pintura6((char*)"Models/Pinturas/Pintura6.obj");
+	Model Pintura7((char*)"Models/Pinturas/Pintura7.obj");
+	Model Pintura8((char*)"Models/Pinturas/Pintura8.obj");
+	Model Pintura10((char*)"Models/Pinturas/Pintura10.obj");
+	Model Pintura11((char*)"Models/Pinturas/Pintura11.obj");
+	Model Boton((char*)"Models/Pinturas/boton.obj");
 
+	//Pinturas Sala2
+	Model Pintura2((char*)"Models/Pinturas/Pintura2.obj");
+	Model Pintura9((char*)"Models/Pinturas/Pintura9.obj");
+	Model Pintura4((char*)"Models/Pinturas/Pintura3.obj");
+	Model Pintura3((char*)"Models/Pinturas/Pintura4.obj");
+	Model Pintura5((char*)"Models/Pinturas/Pintura5.obj");
 
+	//Patio
+	Model PinturaPatio1((char*)"Models/Pinturas/Pintura1P.obj");
+	Model PinturaPatio2((char*)"Models/Pinturas/Pintura2P.obj");
+	Model PinturaPatio3((char*)"Models/Pinturas/Pintura3P.obj");
+	Model LogoPatio((char*)"Models/Pinturas/LogoH.obj");
+	Model LogoPuerta((char*)"Models/Pinturas/Logo.obj");
 
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
@@ -478,15 +498,23 @@ int main()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1050);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		  //Desactiva el canal alfa 
 		Skylight.Draw(lightingShader);
+		glDisable(GL_BLEND);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+<<<<<<< Updated upstream
+=======
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1050);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		  //Desactiva el canal alfa 
+>>>>>>> Stashed changes
 		PuertasPrincipales.Draw(lightingShader);
+		glDisable(GL_BLEND);
 
 		model = glm::mat4(1);
 		model = glm::translate(model, glm::vec3(0.0f, 1.2f + movY_Baseball, 0.0f + movX_Baseball));
@@ -495,27 +523,56 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Baseball.Draw(lightingShader);
 
+<<<<<<< Updated upstream
 		//Pinturas Sala 1
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 1.7f));
+=======
+		////Pinturas
+		//Sala1
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 0.0f));
+>>>>>>> Stashed changes
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura1.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+<<<<<<< Updated upstream
 		model = glm::translate(model, glm::vec3(2.8f, 0.5f, 1.7f));
+=======
+		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura6.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(2.8f, 0.5f, 0.0f));
+>>>>>>> Stashed changes
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura7.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+<<<<<<< Updated upstream
 		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 1.7f));
+=======
+		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura8.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 0.0f));
+>>>>>>> Stashed changes
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura10.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+<<<<<<< Updated upstream
 		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 1.7f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura11.Draw(lightingShader);
@@ -525,6 +582,79 @@ int main()
 		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 0.7f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura8.Draw(lightingShader);*/
+=======
+		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura11.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(1.6f, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Boton.Draw(lightingShader);
+
+		//Sala2
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura2.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura9.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura4.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura3.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Pintura5.Draw(lightingShader);
+
+		//Patio
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		PinturaPatio1.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		PinturaPatio2.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		PinturaPatio3.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		LogoPatio.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		LogoPuerta.Draw(lightingShader);
+>>>>>>> Stashed changes
 
 		glBindVertexArray(0);
 
@@ -607,12 +737,12 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		// Draw the light object (using light's vertex attributes)
 		
-			model = glm::mat4(1);
-			model = glm::translate(model, pointLightPositions[0]);
-			model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			glBindVertexArray(VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+		model = glm::mat4(1);
+		model = glm::translate(model, pointLightPositions[0]);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 		glBindVertexArray(0);
 
