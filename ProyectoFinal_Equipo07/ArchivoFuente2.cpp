@@ -31,8 +31,8 @@
 
 
 // Function prototypes
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
-void MouseCallback(GLFWwindow *window, double xPos, double yPos);
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 void Animation();
 
@@ -202,7 +202,7 @@ float FLegs = 0.0f;
 float RLegs = 0.0f;
 float head = 0.0f;
 float tail = 0.0f;
-glm::vec3 dogPos (0.0f,0.0f,0.0f);
+glm::vec3 dogPos(0.0f, 0.0f, 0.0f);
 float dogRot = 0.0f;
 bool step = false;
 
@@ -220,8 +220,8 @@ glm::vec3 walk1Pos(0.0f);
 float     walk1Yaw = 90.0f; // 0°=+Z, +90°=+X (arranca mirando +X)
 
 // Tamaño del rectángulo (ajústalos a tu gusto)
-float W1_W = 16.0f; 
-float W1_D = 3.0f; 
+float W1_W = 16.0f;
+float W1_D = 3.0f;
 
 // Waypoints del rectángulo, relativos al origin
 glm::vec3 walk1Pts[4] = {
@@ -249,12 +249,12 @@ const float W2_LIM = 2.25f;
 const float W2_M = 0.03f;
 
 glm::vec3 walk2Pts[6] = {
-	glm::vec3(0.0f,   0.0f,   3.0f), 
-	glm::vec3(-15.5f,   0.0f,   3.0f),  
+	glm::vec3(0.0f,   0.0f,   3.0f),
+	glm::vec3(-15.5f,   0.0f,   3.0f),
 	glm::vec3(-15.5f,   0.0f, -15.0f),
-	glm::vec3(2.5f,   0.0f, -15.0f),  
-	glm::vec3(2.5f,   0.0f, 1.5f),   
-	glm::vec3(0.0f,   0.0f, 0.0f), 
+	glm::vec3(2.5f,   0.0f, -15.0f),
+	glm::vec3(2.5f,   0.0f, 1.5f),
+	glm::vec3(0.0f,   0.0f, 0.0f),
 };
 
 int   walk2Wp = 0;
@@ -321,7 +321,7 @@ int main()
 	Shader animShader("Shader/anim.vs", "Shader/anim.frag");
 
 
-	
+
 	//models
 	Model Muros((char*)"Models/EstructuraBase.obj");
 	Model Bench((char*)"Models/Bench/Bench.obj");
@@ -333,31 +333,7 @@ int main()
 	Model Pasto((char*)"Models/Pasto/Pasto.obj");
 	Model Baseball((char*)"Models/Baseball/Baseball.obj");
 
-<<<<<<< HEAD
 	//Modelos de Miximo
-=======
-	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
-	Birds.initShaders(animShader.Program);
-
-	ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
-	Bat.initShaders(animShader.Program);
-
-	//Pinturas
-	Model Pintura1((char*)"Models/Pinturas/Pintura1.obj");
-	Model Pintura2((char*)"Models/Pinturas/Pintura2.obj");
-	Model Pintura3((char*)"Models/Pinturas/Pintura3.obj");
-	Model Pintura4((char*)"Models/Pinturas/Pintura4.obj");
-	Model Pintura5((char*)"Models/Pinturas/Pintura5.obj");
-	Model Pintura6((char*)"Models/Pinturas/Pintura6.obj");
-	Model Pintura7((char*)"Models/Pinturas/Pintura7.obj");
-	Model Pintura8((char*)"Models/Pinturas/Pintura8.obj");
-	Model Pintura9((char*)"Models/Pinturas/Pintura9.obj");
-	Model Pintura10((char*)"Models/Pinturas/Pintura10.obj");
-	Model Pintura11((char*)"Models/Pinturas/Pintura11.obj");
-
-	//Modelos de Miximo
-
->>>>>>> Rama-de-Gaby
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
 	Niño.initShaders(animShader.Program);
 	ModelAnim Walk1((char*)"Models/Walking/Walking.dae");
@@ -448,7 +424,7 @@ int main()
 	{
 		glm::vec3 toT = walk1Pts[0] - walk1Pos;
 		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
-		walk1Yaw = desiredYaw;  
+		walk1Yaw = desiredYaw;
 		walk1Wp = 0;
 		walk1Run = true;
 	}
@@ -595,7 +571,7 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1050);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		  //Desactiva el canal alfa 
+		//Desactiva el canal alfa 
 		Skylight.Draw(lightingShader);
 		glDisable(GL_BLEND);
 
@@ -604,18 +580,9 @@ int main()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-<<<<<<< HEAD
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDisable(GL_BLEND);  //Desactiva el canal alfa 
-=======
-<<<<<<< Updated upstream
-=======
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1050);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		  //Desactiva el canal alfa 
->>>>>>> Stashed changes
->>>>>>> Rama-de-Gaby
+		//Desactiva el canal alfa 
 		PuertasPrincipales.Draw(lightingShader);
 		glDisable(GL_BLEND);
 
@@ -626,26 +593,16 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Baseball.Draw(lightingShader);
 
-<<<<<<< Updated upstream
-		//Pinturas Sala 1
-		model = glm::mat4(1);
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 1.7f));
-=======
 		////Pinturas
 		//Sala1
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 0.0f));
->>>>>>> Stashed changes
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura1.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-<<<<<<< Updated upstream
-		model = glm::translate(model, glm::vec3(2.8f, 0.5f, 1.7f));
-=======
 		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura6.Draw(lightingShader);
@@ -653,15 +610,11 @@ int main()
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		model = glm::translate(model, glm::vec3(2.8f, 0.5f, 0.0f));
->>>>>>> Stashed changes
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura7.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-<<<<<<< Updated upstream
-		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 1.7f));
-=======
 		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura8.Draw(lightingShader);
@@ -669,23 +622,11 @@ int main()
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 0.0f));
->>>>>>> Stashed changes
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura10.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-<<<<<<< Updated upstream
-		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 1.7f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Pintura11.Draw(lightingShader);
-
-		/*model = glm::mat4(1);
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 0.7f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Pintura8.Draw(lightingShader);*/
-=======
 		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura11.Draw(lightingShader);
@@ -757,7 +698,6 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0, 0.5f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		LogoPuerta.Draw(lightingShader);
->>>>>>> Stashed changes
 
 		glBindVertexArray(0);
 
@@ -808,13 +748,13 @@ int main()
 
 
 		model = glm::mat4(1);
-		glm::vec3 nuevaPos = glm::vec3((centroVuelo.x + radioVuelo * cos(anguloVuelo))/2, centroVuelo.y, (centroVuelo.z + radioVuelo * sin(anguloVuelo)));
+		glm::vec3 nuevaPos = glm::vec3((centroVuelo.x + radioVuelo * cos(anguloVuelo)) / 2, centroVuelo.y, (centroVuelo.z + radioVuelo * sin(anguloVuelo)));
 		model = glm::translate(model, nuevaPos);
 		model = glm::scale(model, glm::vec3(0.018f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // volteamos
 		model = glm::rotate(model, -anguloVuelo + glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // rotacion
 		model = glm::rotate(model, glm::radians(15.0f * sin(anguloVuelo * 4.0f)), glm::vec3(1.0f, 0.0f, 0.1f)); // rotacion de inclinacion
-		glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(model));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Birds.Draw(animShader);
 		glBindVertexArray(0);
 
@@ -830,7 +770,7 @@ int main()
 	 //   Ball.Draw(lightingShader); 
 		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
 		//glBindVertexArray(0);
-	
+
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -847,14 +787,14 @@ int main()
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		// Draw the light object (using light's vertex attributes)
-		
+
 		model = glm::mat4(1);
 		model = glm::translate(model, pointLightPositions[0]);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-		
+
 		glBindVertexArray(0);
 
 		// Draw skybox as last
@@ -946,14 +886,14 @@ void DoMovement()
 		pointLightPositions[0].z += 0.01f;
 	}
 	if (keys[GLFW_KEY_K]) walk2Run = !walk2Run;
-	if (keys[GLFW_KEY_L]) walk1Run = !walk1Run; 
+	if (keys[GLFW_KEY_L]) walk1Run = !walk1Run;
 
 
-	
+
 }
 
 // Is called whenever a key is pressed/released via GLFW
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
@@ -978,7 +918,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		if (active)
 		{
 			Light1 = glm::vec3(0.2f, 0.8f, 1.0f);
-			
+
 		}
 		else
 		{
@@ -1032,7 +972,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
 		}
 	}
-	
+
 }
 void Animation() {
 	anguloVuelo += 0.4f * deltaTime;
@@ -1127,7 +1067,7 @@ void Animation() {
 	{
 		orientacionBaseball -= 6.1f;
 		//i += 0.12f;
-		i += deltaTime/2;
+		i += deltaTime / 2;
 		movX_Baseball = 0 + i * v * cos(ang * n / 180);
 		movY_Baseball = 0 + (i * v * sin(ang * n / 180) - (g * i * i) / 2);
 		if (movY_Baseball <= 0.0f)
@@ -1140,7 +1080,7 @@ void Animation() {
 	}
 }
 
-void MouseCallback(GLFWwindow *window, double xPos, double yPos)
+void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
 	if (firstMouse)
 	{
@@ -1157,4 +1097,3 @@ void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 
 	camera.ProcessMouseMovement(xOffset, yOffset);
 }
-//Ojalá salga bien :)
