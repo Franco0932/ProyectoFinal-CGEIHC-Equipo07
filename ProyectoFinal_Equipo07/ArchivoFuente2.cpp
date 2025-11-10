@@ -82,14 +82,14 @@ float throwTime = 0.0f;
 const float throwLaunchOffset = 0.0f;
 
 // avion con keyframes
-float rotHelice = 0.0f; 
-glm::vec3 avionPos = glm::vec3(2.0f, 10.0f, 0.0f); 
-float avionRoll = 0.0f;  
-float avionSpeed = 3.0f; 
+float rotHelice = 0.0f;
+glm::vec3 avionPos = glm::vec3(2.0f, 10.0f, 0.0f);
+float avionRoll = 0.0f;
+float avionSpeed = 3.0f;
 float avionRot = 0.0f;
 
 #define MAX_FRAMES 20  
-float total_animation_time = 1.5f; 
+float total_animation_time = 1.5f;
 float current_animation_time = 0.0f;
 
 typedef struct _frame {
@@ -108,9 +108,9 @@ typedef struct _frame {
 } FRAME;
 
 FRAME KeyFrame[MAX_FRAMES]; // arreglo de keyframes
-int FrameIndex = 0;       
-bool play = false;         
-int playIndex = 0;        
+int FrameIndex = 0;
+bool play = false;
+int playIndex = 0;
 
 float vertices[] = {
 	 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -308,15 +308,15 @@ float walk2FaceEps = 2.0f;    // “casi” alineado
 
 
 //Animación de apertura/cierre de la puerta
-float speed = 50.0f; 
+float speed = 50.0f;
 float speed2 = 1.0f;
 float tiempo = glfwGetTime() * speed2;
 bool puerta1Abriendo = false;
 bool puerta1Cerrando = false;
 bool puerta2Abriendo = false;
 bool puerta2Cerrando = false;
-float rotPuertaVidrio = 0.0f;  
-float rotPuertaVidrio2 = 0.0f; 
+float rotPuertaVidrio = 0.0f;
+float rotPuertaVidrio2 = 0.0f;
 float velocidadAnimacion = 0.3f;
 
 // Deltatime
@@ -428,7 +428,7 @@ int main()
 	Model PinturaPatio3((char*)"Models/Pinturas/Pintura3P.obj");
 	Model LogoPatio((char*)"Models/Pinturas/LogoH.obj");
 	Model LogoPuerta((char*)"Models/Pinturas/Logo.obj");
-	
+
 	// Avion y frames
 	Model avion_cuerpo((char*)"Models/avion/avion_cuerpo.obj");
 	Model avion_helice((char*)"Models/avion/avion_helice1.obj");
@@ -834,9 +834,9 @@ int main()
 		modelTemp = model;
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		avion_cuerpo.Draw(lightingShader);
-		model = modelTemp; 
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.5f)); 
-		
+		model = modelTemp;
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.5f));
+
 		//model = glm::rotate(model, glm::radians(rotHelice), glm::vec3(0.0f, 0.0f, 1.0f)); no rota sobre su propio eje
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		avion_helice.Draw(lightingShader);
@@ -1049,7 +1049,7 @@ void DoMovement()
 	*/
 	if (keys[GLFW_KEY_K]) walk2Run = !walk2Run;
 	if (keys[GLFW_KEY_L]) walk1Run = !walk1Run;
-	
+
 	if (!play)
 	{
 		float targetRoll = 0.0f;
@@ -1140,7 +1140,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 	if (keys[GLFW_KEY_R]) {
 		walk2Pos = glm::vec3(0.0f);
-		walk2Yaw = 0.0f;   // o cualquier otro para ver el primer giro suave
+		walk2Yaw = 0.0f; 
 		walk2Wp = 0;
 		walk2Run = true;
 	}
@@ -1190,34 +1190,25 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		puerta1Abriendo = false; puerta1Cerrando = true;
 		puerta2Abriendo = false; puerta2Cerrando = true;
 	}
-	//Puerta
-	if (key == GLFW_KEY_F && action == GLFW_PRESS) {
-		puerta1Abriendo = true;  puerta1Cerrando = false;
-		puerta2Abriendo = true;  puerta2Cerrando = false;
-	}
-	if (key == GLFW_KEY_COMMA && action == GLFW_PRESS) {
-		puerta1Abriendo = false; puerta1Cerrando = true;
-		puerta2Abriendo = false; puerta2Cerrando = true;
-	}
-	
-	if (key == GLFW_KEY_KP_1 && action == GLFW_PRESS)
+
+	if (key == GLFW_KEY_9 && action == GLFW_PRESS)
 	{
 		saveFrame();
 	}
 
 	// Reproducir Animación 
-	if (key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
+	if (key == GLFW_KEY_0 && action == GLFW_PRESS)
 	{
-		if (play == false && (FrameIndex > 1)) 
+		if (play == false && (FrameIndex > 1))
 		{
 			printf("Reproduciendo animacion...\n");
-			resetElements();     
-			interpolation();      
-			play = true;         
+			resetElements();
+			interpolation();
+			play = true;
 			playIndex = 0;
 			current_animation_time = 0.0f;
 		}
-		else 
+		else
 		{
 			play = false;
 		}
@@ -1363,10 +1354,10 @@ void Animation() {
 				playIndex = 0;
 				play = false;
 			}
-			else 
+			else
 			{
 				current_animation_time = 0.0f;
-				interpolation(); 
+				interpolation();
 			}
 		}
 		else

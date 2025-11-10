@@ -12,5 +12,5 @@ newmtl Material__91
 	Kd 1.0000 1.0000 1.0000
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka C:\Users\gabir\Desktop\imagenes museum\imagen1.jpg
-	map_Kd C:\Users\gabir\Desktop\imagenes museum\imagen1.jpg
+	map_Ka imagen1.jpg
+	map_Kd imagen1.jpg
