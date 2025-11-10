@@ -1,4 +1,4 @@
-#include <iostream>
+Ôªø#include <iostream>
 #include <cmath>
 
 // GLEW
@@ -47,16 +47,24 @@ GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
 // Light attributes
-glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+glm::vec3 lightPos(0.0f, 4.5f, 0.0f);
 bool active;
 
 // Positions of the point lights
 glm::vec3 pointLightPositions[] = {
-	glm::vec3(0.0f,2.0f, 0.0f),
-	glm::vec3(0.0f,0.0f, 0.0f),
-	glm::vec3(0.0f,0.0f,  0.0f),
-	glm::vec3(0.0f,0.0f, 0.0f)
+	glm::vec3(0.0f,5.0f, 0.0f),
+	glm::vec3(2.0f,2.0f, 0.0f),
+	glm::vec3(4.0f,4.0f,  0.0f),
+	glm::vec3(3.0f,3.0f, 0.0f)
 };
+
+float movelightPos = 0.0f;
+float movelightPos2 = 0.0f;
+float angleX = 0.0f;
+float angleY = 0.0f;
+float radius = 30.0f; //√≥rbita de la luz
+float rot = 0.0f;
+bool activanim = false;
 
 //Tiro parabolico variables
 float	g = 9.81f, v = 12.0f, ang = 12.0f, t = 45.0f, orientacionBaseball = 0.0f, movX_Baseball = 0.0f, movY_Baseball = 0.0f;
@@ -64,7 +72,7 @@ double	n = 3.1416;
 float	i = 0.0f;
 bool animBaseball = false;
 
-//Throw sincronizado (niÒo + pelota) ---
+//Throw sincronizado (ni√±o + pelota) ---
 bool playingThrow = false;
 float throwTime = 0.0f;
 const float throwLaunchOffset = 0.0f;
@@ -213,17 +221,17 @@ glm::vec3 centroVuelo = glm::vec3(2.0f, 8.0f, 0.0f);
 
 
 //Walk1
-bool walk1Run = true;
+bool walk1Run = false;
 glm::vec3 walk1Origin = glm::vec3(-3.5f, 0.0f, -12.5f); // donde ya lo dibujabas
 
 glm::vec3 walk1Pos(0.0f);
-float     walk1Yaw = 90.0f; // 0∞=+Z, +90∞=+X (arranca mirando +X)
+float     walk1Yaw = 90.0f; // 0¬∞=+Z, +90¬∞=+X (arranca mirando +X)
 
-// TamaÒo del rect·ngulo (aj˙stalos a tu gusto)
+// Tama√±o del rect√°ngulo (aj√∫stalos a tu gusto)
 float W1_W = 16.0f;
 float W1_D = 3.0f;
 
-// Waypoints del rect·ngulo, relativos al origin
+// Waypoints del rect√°ngulo, relativos al origin
 glm::vec3 walk1Pts[4] = {
 	glm::vec3(W1_W, 0.0f,   0.0f),   // 1) +X (va al costado)
 	glm::vec3(W1_W, 0.0f, +W1_D),   // 2) +Z (frente del escenario)
@@ -232,18 +240,18 @@ glm::vec3 walk1Pts[4] = {
 };
 int   walk1Wp = 0;
 float walk1Speed = 1.3f;     // u/s (velocidad de caminar)
-float walk1TurnSpeed = 120.0f;   // ∞/s (quÈ tan r·pido gira)
-float walk1ArriveEps = 0.05f;    // umbral para "llegÛ" al punto
-float walk1FaceEps = 2.0f;     // cu·n alineado debe estar para avanzar
+float walk1TurnSpeed = 120.0f;   // ¬∞/s (qu√© tan r√°pido gira)
+float walk1ArriveEps = 0.05f;    // umbral para "lleg√≥" al punto
+float walk1FaceEps = 2.0f;     // cu√°n alineado debe estar para avanzar
 
 
 
 //Walk2
-bool walk2Run = true;
-glm::vec3 walk2Origin = glm::vec3(7.0f, 0.0f, 6.0f); // donde lo colocas en escena
+bool walk2Run = false;
+glm::vec3 walk2Origin = glm::vec3(7.0f, 0.0f, 6.0f);
 
-glm::vec3 walk2Pos(0.0f); // posiciÛn relativa al origin
-float     walk2Yaw = 0.0f; // 0∞ = +Z
+glm::vec3 walk2Pos(0.0f); // posici√≥n relativa al origin
+float     walk2Yaw = 0.0f; // 0¬∞ = +Z
 
 const float W2_LIM = 2.25f;
 const float W2_M = 0.03f;
@@ -259,10 +267,22 @@ glm::vec3 walk2Pts[6] = {
 
 int   walk2Wp = 0;
 float walk2Speed = 0.9f;    // u/s
-float walk2TurnSpeed = 120.0f;  // ∞/s
-float walk2ArriveEps = 0.04f;   // llegÛ
-float walk2FaceEps = 2.0f;    // ìcasiî alineado
+float walk2TurnSpeed = 120.0f;  // ¬∞/s
+float walk2ArriveEps = 0.04f;   // lleg√≥
+float walk2FaceEps = 2.0f;    // ‚Äúcasi‚Äù alineado
 
+
+//Animaci√≥n de apertura/cierre de la puerta
+float speed = 50.0f; 
+float speed2 = 1.0f;
+float tiempo = glfwGetTime() * speed2;
+bool puerta1Abriendo = false;
+bool puerta1Cerrando = false;
+bool puerta2Abriendo = false;
+bool puerta2Cerrando = false;
+float rotPuertaVidrio = 0.0f;  
+float rotPuertaVidrio2 = 0.0f; 
+float velocidadAnimacion = 0.3f;
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -329,13 +349,16 @@ int main()
 	Model PisoPatio((char*)"Models/Patio/Patio.obj");
 	Model PisoPasillo((char*)"Models/PisoPasillos/PisoPasillos.obj");
 	Model Skylight((char*)"Models/Tragaluz/Tragaluz.obj");
-	Model PuertasPrincipales((char*)"Models/PuertasPrincipales/PuertasPrincipales.obj");
+	Model PuertasPrincipalesIzq((char*)"Models/PuertasPrincipales/PuertasPrincipalesIzq.obj");
+	Model PuertasPrincipalesDer((char*)"Models/PuertasPrincipales/PuertasPrincipalesDer.obj");
 	Model Pasto((char*)"Models/Pasto/Pasto.obj");
 	Model Baseball((char*)"Models/Baseball/Baseball.obj");
+	Model Moon((char*)"Models/Moon/Moon.obj");
+
 
 	//Modelos de Miximo
-	ModelAnim NiÒo((char*)"Models/Throw/Throw.dae");
-	NiÒo.initShaders(animShader.Program);
+	ModelAnim Ni√±o((char*)"Models/Throw/Throw.dae");
+	Ni√±o.initShaders(animShader.Program);
 	ModelAnim Walk1((char*)"Models/Walking/Walking.dae");
 	Walk1.initShaders(animShader.Program);
 	ModelAnim Walk2((char*)"Models/Walking2/Walking.dae");
@@ -400,12 +423,12 @@ int main()
 
 	// Load textures
 	vector<const GLchar*> faces;
-	faces.push_back("SkyBox/rightEdif.tga");
-	faces.push_back("SkyBox/leftEdif.tga");
-	faces.push_back("SkyBox/topEdif.tga");
-	faces.push_back("SkyBox/bottomEdif.tga");
-	faces.push_back("SkyBox/backEdif.tga");
-	faces.push_back("SkyBox/frontEdif.tga");
+	faces.push_back("SkyBox/right.tga");
+	faces.push_back("SkyBox/left.tga");
+	faces.push_back("SkyBox/top.tga");
+	faces.push_back("SkyBox/bottom.tga");
+	faces.push_back("SkyBox/back.tga");
+	faces.push_back("SkyBox/front.tga");
 
 	GLuint cubemapTexture = TextureLoading::LoadCubemap(faces);
 
@@ -420,24 +443,24 @@ int main()
 	}
 
 	// Walk1
-	walk1Pos = glm::vec3(0.0f);
-	{
-		glm::vec3 toT = walk1Pts[0] - walk1Pos;
-		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
-		walk1Yaw = desiredYaw;
-		walk1Wp = 0;
-		walk1Run = true;
-	}
+	//walk1Pos = glm::vec3(0.0f);
+	//{
+	//	glm::vec3 toT = walk1Pts[0] - walk1Pos;
+	//	float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
+	//	walk1Yaw = desiredYaw;
+	//	walk1Wp = 0;
+	//	walk1Run = true;
+	//}
 
-	// Walk2
-	walk2Pos = glm::vec3(0.0f);
-	{
-		glm::vec3 toT = walk2Pts[0] - walk2Pos;
-		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
-		walk2Yaw = desiredYaw;
-		walk2Wp = 0;
-		walk2Run = true;
-	}
+	//// Walk2
+	//walk2Pos = glm::vec3(0.0f);
+	//{
+	//	glm::vec3 toT = walk2Pts[0] - walk2Pos;
+	//	float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
+	//	walk2Yaw = desiredYaw;
+	//	walk2Wp = 0;
+	//	walk2Run = true;
+	//}
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -454,7 +477,8 @@ int main()
 		Animation();
 
 		// Clear the colorbuffer
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.06f, 0.06f, 0.10f, 1.0f);
+		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// OpenGL options
@@ -475,11 +499,14 @@ int main()
 		glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 
 
+		lightPos.y = radius * cos(angleY);
+		lightPos.x = radius * sin(angleY);
+
 		// Directional light
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.3f, 0.3f, 0.3f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.15f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.06f, 0.07f, 0.10f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.18f, 0.22f, 0.30f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.20f, 0.22f, 0.30f);
 
 
 		// Point light 1
@@ -488,14 +515,38 @@ int main()
 		lightColor.y = abs(sin(glfwGetTime() * Light1.y));
 		lightColor.z = sin(glfwGetTime() * Light1.z);
 
-
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), lightColor.x, lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightColor.x, lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 1.0f, 0.2f, 0.2f);
+		//Moon point light
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), 0.02f, 0.03f, 0.06f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), 0.10f, 0.14f, 0.22f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 0.16f, 0.18f, 0.26f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.018f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.0012f);
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"), lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].diffuse"), lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].specular"), 1.0f, 0.2f, 0.2f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.045f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.075f);
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].ambient"), lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].diffuse"), lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].specular"), 1.0f, 0.2f, 0.2f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[2].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[2].linear"), 0.045f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[2].quadratic"), 0.075f);
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].position"), pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].ambient"), lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].diffuse"), lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].specular"), 1.0f, 0.2f, 0.2f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].linear"), 0.045f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].quadratic"), 0.075f);
 
 
 		// SpotLight
@@ -512,7 +563,10 @@ int main()
 
 
 		// Set material properties
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 5.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"), 0.07f, 0.07f, 0.07f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0.35f, 0.35f, 0.35f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"), 0.40f, 0.40f, 0.40f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 24.0f);
 
 		// Create camera transformations
 		glm::mat4 view;
@@ -579,11 +633,22 @@ int main()
 		glEnable(GL_BLEND);//Activa la funcionalidad para trabajar el canal alfa
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-45.771f, 6.833f, -34.167f));
+		model = glm::rotate(model, glm::radians(rotPuertaVidrio), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1050);
+		PuertasPrincipalesDer.Draw(lightingShader);
+		glDisable(GL_BLEND);
+
+		model = glm::mat4(1);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-45.876f, 7.659f, -50.525f));
+		model = glm::rotate(model, glm::radians(rotPuertaVidrio2), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		//Desactiva el canal alfa 
-		PuertasPrincipales.Draw(lightingShader);
+		PuertasPrincipalesIzq.Draw(lightingShader);
 		glDisable(GL_BLEND);
 
 		model = glm::mat4(1);
@@ -716,9 +781,9 @@ int main()
 
 		glUniform3f(glGetUniformLocation(animShader.Program, "material.specular"), 0.5f, 0.5f, 0.5f);
 		glUniform1f(glGetUniformLocation(animShader.Program, "material.shininess"), 32.0f);
-		glUniform3f(glGetUniformLocation(animShader.Program, "light.ambient"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(animShader.Program, "light.diffuse"), 0.06, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(animShader.Program, "light.specular"), 0.5f, 0.5f, 0.5f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.ambient"), 0.15f, 0.15f, 0.18f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.diffuse"), 0.35f, 0.35f, 0.45f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.specular"), 0.30f, 0.30f, 0.35f);
 		glUniform3f(glGetUniformLocation(animShader.Program, "light.direction"), 0.0f, -1.0f, -1.0f);
 		view = camera.GetViewMatrix();
 
@@ -727,7 +792,7 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.008f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		NiÒo.Draw(animShader);
+		Ni√±o.Draw(animShader);
 
 
 		model = glm::mat4(1);
@@ -783,13 +848,30 @@ int main()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 		model = glm::mat4(1);
-		model = glm::translate(model, lightPos);
+		model = glm::translate(model, lightPos + movelightPos);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAO);
+		Moon.Draw(lightingShader);
 		// Draw the light object (using light's vertex attributes)
 
 		model = glm::mat4(1);
-		model = glm::translate(model, pointLightPositions[0]);
+		model = glm::translate(model, pointLightPositions[1]);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//Moon.Draw(lampShader);
+
+		model = glm::mat4(1);
+		model = glm::translate(model, pointLightPositions[2]);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		model = glm::mat4(1);
+		model = glm::translate(model, pointLightPositions[3]);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glBindVertexArray(VAO);
@@ -861,13 +943,13 @@ void DoMovement()
 
 	if (keys[GLFW_KEY_T])
 	{
-		pointLightPositions[0].x += 0.01f;
+		angleY += 0.05f;
 	}
 	if (keys[GLFW_KEY_G])
 	{
-		pointLightPositions[0].x -= 0.01f;
+		angleY -= 0.05f;
 	}
-
+	/*
 	if (keys[GLFW_KEY_Y])
 	{
 		pointLightPositions[0].y += 0.01f;
@@ -885,6 +967,7 @@ void DoMovement()
 	{
 		pointLightPositions[0].z += 0.01f;
 	}
+	*/
 	if (keys[GLFW_KEY_K]) walk2Run = !walk2Run;
 	if (keys[GLFW_KEY_L]) walk1Run = !walk1Run;
 
@@ -944,12 +1027,12 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 	if (keys[GLFW_KEY_Z]) {
 		if (gAudioReady) {
-			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+			ma_engine_play_sound(&gAudio, "Audio/Z.mp3", NULL);
 		}
 	}
 	if (keys[GLFW_KEY_X]) {
 		if (gAudioReady) {
-			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+			ma_engine_play_sound(&gAudio, "Audio/X.mp3", NULL);
 		}
 	}
 	if (keys[GLFW_KEY_C]) {
@@ -973,24 +1056,54 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		}
 	}
 
+	//Puerta
+	if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+		puerta1Abriendo = true;  puerta1Cerrando = false;
+		puerta2Abriendo = true;  puerta2Cerrando = false;
+	}
+	if (key == GLFW_KEY_COMMA && action == GLFW_PRESS) {
+		puerta1Abriendo = false; puerta1Cerrando = true;
+		puerta2Abriendo = false; puerta2Cerrando = true;
+	}
+
 }
 void Animation() {
+
+	if (puerta1Abriendo) {
+		rotPuertaVidrio += velocidadAnimacion;
+		if (rotPuertaVidrio > 70.0f) rotPuertaVidrio = 70.0f;
+	}
+	if (puerta1Cerrando) {
+		rotPuertaVidrio -= velocidadAnimacion;
+		if (rotPuertaVidrio < 0.0f) rotPuertaVidrio = 0.0f;
+	}
+
+	// Puerta 2: 0¬∞ a ‚àí70¬∞ (abre al lado opuesto)
+	if (puerta2Abriendo) {
+		rotPuertaVidrio2 -= velocidadAnimacion;
+		if (rotPuertaVidrio2 < -70.0f) rotPuertaVidrio2 = -70.0f;
+	}
+	if (puerta2Cerrando) {
+		rotPuertaVidrio2 += velocidadAnimacion;
+		if (rotPuertaVidrio2 > 0.0f) rotPuertaVidrio2 = 0.0f;
+	}
+
 	anguloVuelo += 0.4f * deltaTime;
 	if (AnimBall)
 	{
 		rotBall += 0.4f;
 	}
 
-	// -------- Walk1 path (rect·ngulo, giro progresivo) --------
+	// -------- Walk1 path (rect√°ngulo, giro progresivo) --------
 	if (walk1Run) {
 		glm::vec3 target = walk1Pts[walk1Wp];
 		glm::vec3 toT = target - walk1Pos;
 		float distXZ = glm::length(glm::vec2(toT.x, toT.z));
 
-		// Yaw deseado (0∞=+Z, +90∞=+X)
+		// Yaw deseado (0¬∞=+Z, +90¬∞=+X)
 		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
 
-		// Diferencia angular mÌnima en [-180,180]
+		// Diferencia angular m√≠nima en [-180,180]
 		float diff = desiredYaw - walk1Yaw;
 		while (diff > 180.0f)  diff -= 360.0f;
 		while (diff < -180.0f) diff += 360.0f;
@@ -1000,19 +1113,19 @@ void Animation() {
 		if (std::abs(diff) > maxStep) walk1Yaw += (diff > 0 ? maxStep : -maxStep);
 		else                          walk1Yaw = desiredYaw;
 
-		// Avanza si ya est· casi alineado
+		// Avanza si ya est√° casi alineado
 		if (std::abs(diff) < walk1FaceEps) {
 			float yaw = glm::radians(walk1Yaw);
 			glm::vec3 fwd(std::sin(yaw), 0.0f, std::cos(yaw));
 			walk1Pos += fwd * (walk1Speed * deltaTime);
 		}
 
-		// øLlegÛ al waypoint?
+		// ¬øLleg√≥ al waypoint?
 		if (distXZ < walk1ArriveEps) {
 			int prev = walk1Wp;
 			walk1Wp = (walk1Wp + 1) % 4;
 
-			// CerrÛ el lazo: limpia drift y normaliza yaw
+			// Cerr√≥ el lazo: limpia drift y normaliza yaw
 			if (prev == 3 && walk1Wp == 0) {
 				walk1Pos = glm::vec3(0.0f);
 				while (walk1Yaw > 180.0f)  walk1Yaw -= 360.0f;
@@ -1028,10 +1141,10 @@ void Animation() {
 		glm::vec3 toT = target - walk2Pos;
 		float distXZ = glm::length(glm::vec2(toT.x, toT.z));
 
-		// Yaw deseado hacia el objetivo (0∞=+Z, +90∞=+X)
+		// Yaw deseado hacia el objetivo (0¬∞=+Z, +90¬∞=+X)
 		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
 
-		// Diferencia angular mÌnima en [-180,180]
+		// Diferencia angular m√≠nima en [-180,180]
 		float diff = desiredYaw - walk2Yaw;
 		while (diff > 180.0f) diff -= 360.0f;
 		while (diff < -180.0f) diff += 360.0f;
@@ -1041,14 +1154,14 @@ void Animation() {
 		if (std::abs(diff) > maxStep) walk2Yaw += (diff > 0 ? maxStep : -maxStep);
 		else                          walk2Yaw = desiredYaw;
 
-		// Avanza solo si est· casi alineado
+		// Avanza solo si est√° casi alineado
 		if (std::abs(diff) < walk2FaceEps) {
 			float yaw = glm::radians(walk2Yaw);
 			glm::vec3 fwd(std::sin(yaw), 0.0f, std::cos(yaw));
 			walk2Pos += fwd * (walk2Speed * deltaTime);
 		}
 
-		// øLlegÛ?
+		// ¬øLleg√≥?
 		if (distXZ < walk2ArriveEps) {
 			int prev = walk2Wp;
 			walk2Wp = (walk2Wp + 1) % 6;
@@ -1097,3 +1210,4 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 
 	camera.ProcessMouseMovement(xOffset, yOffset);
 }
+
