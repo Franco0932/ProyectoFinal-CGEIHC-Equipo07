@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <cmath>
+#include <algorithm>
 
 // GLEW
 #include <GL/glew.h>
@@ -35,6 +36,9 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 void Animation();
+void saveFrame(void);
+void resetElements(void);
+void interpolation(void);
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -76,6 +80,37 @@ bool animBaseball = false;
 bool playingThrow = false;
 float throwTime = 0.0f;
 const float throwLaunchOffset = 0.0f;
+
+// avion con keyframes
+float rotHelice = 0.0f;
+glm::vec3 avionPos = glm::vec3(2.0f, 10.0f, 0.0f);
+float avionRoll = 0.0f;
+float avionSpeed = 3.0f;
+float avionRot = 0.0f;
+
+#define MAX_FRAMES 20  
+float total_animation_time = 1.5f;
+float current_animation_time = 0.0f;
+
+typedef struct _frame {
+	float avionPosX;
+	float avionPosY;
+	float avionPosZ;
+	float avionRoll;
+	float avionRot;
+
+	float incX;
+	float incY;
+	float incZ;
+	float incRoll;
+	float incRot;
+
+} FRAME;
+
+FRAME KeyFrame[MAX_FRAMES]; // arreglo de keyframes
+int FrameIndex = 0;
+bool play = false;
+int playIndex = 0;
 
 float vertices[] = {
 	 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -273,15 +308,15 @@ float walk2FaceEps = 2.0f;    // “casi” alineado
 
 
 //Animación de apertura/cierre de la puerta
-float speed = 50.0f; 
+float speed = 50.0f;
 float speed2 = 1.0f;
 float tiempo = glfwGetTime() * speed2;
 bool puerta1Abriendo = false;
 bool puerta1Cerrando = false;
 bool puerta2Abriendo = false;
 bool puerta2Cerrando = false;
-float rotPuertaVidrio = 0.0f;  
-float rotPuertaVidrio2 = 0.0f; 
+float rotPuertaVidrio = 0.0f;
+float rotPuertaVidrio2 = 0.0f;
 float velocidadAnimacion = 0.3f;
 
 // Deltatime
@@ -355,7 +390,6 @@ int main()
 	Model Baseball((char*)"Models/Baseball/Baseball.obj");
 	Model Moon((char*)"Models/Moon/Moon.obj");
 
-
 	//Modelos de Miximo
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
 	Niño.initShaders(animShader.Program);
@@ -366,8 +400,11 @@ int main()
 
 	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
 	Birds.initShaders(animShader.Program);
-	ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
-	Bat.initShaders(animShader.Program);
+
+
+
+	/*ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
+	Bat.initShaders(animShader.Program);*/
 
 	//Pinturas Sala1
 	Model Pintura1((char*)"Models/Pinturas/Pintura1.obj");
@@ -392,6 +429,24 @@ int main()
 	Model LogoPatio((char*)"Models/Pinturas/LogoH.obj");
 	Model LogoPuerta((char*)"Models/Pinturas/Logo.obj");
 
+	// Avion y frames
+	Model avion_cuerpo((char*)"Models/avion/avion_cuerpo.obj");
+	Model avion_helice((char*)"Models/avion/avion_helice1.obj");
+	for (int i = 0; i < MAX_FRAMES; i++)
+	{
+		KeyFrame[i].avionPosX = 0;
+		KeyFrame[i].avionPosY = 0;
+		KeyFrame[i].avionPosZ = 0;
+		KeyFrame[i].avionRoll = 0;
+		KeyFrame[i].avionRot = 0;
+		KeyFrame[i].incX = 0;
+		KeyFrame[i].incY = 0;
+		KeyFrame[i].incZ = 0;
+		KeyFrame[i].incRoll = 0;
+		KeyFrame[i].incRot = 0;
+	}
+
+
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
 	glGenVertexArrays(1, &VAO);
@@ -408,6 +463,7 @@ int main()
 
 	// Set texture units
 	lightingShader.Use();
+	glUniform1i(glGetUniformLocation(lightingShader.Program, "useSolidColor"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.specular"), 1);
 
@@ -630,7 +686,7 @@ int main()
 		glDisable(GL_BLEND);
 
 		model = glm::mat4(1);
-		glEnable(GL_BLEND);//Activa la funcionalidad para trabajar el canal alfa
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 		model = glm::translate(model, glm::vec3(-45.771f, 6.833f, -34.167f));
@@ -662,19 +718,19 @@ int main()
 		//Sala1
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(-2.8f, 0.5f, 1.8f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura1.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(-0.8f, 0.3f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura6.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(2.8f, 0.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(2.8f, 0.5f, 1.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura7.Draw(lightingShader);
 
@@ -686,13 +742,13 @@ int main()
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(-0.8f, 0.5f, 1.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura10.Draw(lightingShader);
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.8f, 0.5f, 1.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Pintura11.Draw(lightingShader);
 
@@ -764,6 +820,27 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		LogoPuerta.Draw(lightingShader);
 
+		//avion
+		lightingShader.Use();
+		modelLoc = glGetUniformLocation(lightingShader.Program, "model");
+		model = glm::mat4(1.0f);
+
+		model = glm::translate(model, avionPos);
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(180.0f + avionRot), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(avionRoll), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.08f, 0.08f, 0.08f));
+
+		modelTemp = model;
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		avion_cuerpo.Draw(lightingShader);
+		model = modelTemp;
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.5f));
+
+		//model = glm::rotate(model, glm::radians(rotHelice), glm::vec3(0.0f, 0.0f, 1.0f)); no rota sobre su propio eje
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		avion_helice.Draw(lightingShader);
+
 		glBindVertexArray(0);
 
 
@@ -822,6 +899,8 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Birds.Draw(animShader);
 		glBindVertexArray(0);
+
+
 
 		//glEnable(GL_CULL_FACE);
 
@@ -971,6 +1050,52 @@ void DoMovement()
 	if (keys[GLFW_KEY_K]) walk2Run = !walk2Run;
 	if (keys[GLFW_KEY_L]) walk1Run = !walk1Run;
 
+	if (!play)
+	{
+		float targetRoll = 0.0f;
+		float rollSpeed = 7.0f;
+		float maxRoll = 20.0f;
+
+		if (keys[GLFW_KEY_KP_4])
+		{
+			avionPos.x -= avionSpeed * deltaTime;
+			targetRoll = maxRoll;
+		}
+		if (keys[GLFW_KEY_KP_6])
+		{
+			avionPos.x += avionSpeed * deltaTime;
+			targetRoll = -maxRoll;
+		}
+		if (keys[GLFW_KEY_KP_8])
+		{
+			avionPos.z -= avionSpeed * deltaTime;
+		}
+		if (keys[GLFW_KEY_KP_5])
+		{
+			avionPos.z += avionSpeed * deltaTime;
+		}
+		if (keys[GLFW_KEY_KP_9])
+		{
+			avionPos.y += avionSpeed * deltaTime;
+		}
+		if (keys[GLFW_KEY_KP_7])
+		{
+			avionPos.y -= avionSpeed * deltaTime;
+		}
+		avionRoll += (targetRoll - avionRoll) * rollSpeed * deltaTime;
+
+		float yawSpeed = 80.0f; // Grados por segundo (ajústalo)
+
+		if (keys[GLFW_KEY_1])
+		{
+			avionRot += yawSpeed * deltaTime;
+		}
+		// Girar Derecha (Tecla '2')
+		if (keys[GLFW_KEY_2])
+		{
+			avionRot -= yawSpeed * deltaTime;
+		}
+	}
 
 
 }
@@ -1015,7 +1140,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 	if (keys[GLFW_KEY_R]) {
 		walk2Pos = glm::vec3(0.0f);
-		walk2Yaw = 0.0f;   // o cualquier otro para ver el primer giro suave
+		walk2Yaw = 0.0f; 
 		walk2Wp = 0;
 		walk2Run = true;
 	}
@@ -1066,9 +1191,32 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		puerta2Abriendo = false; puerta2Cerrando = true;
 	}
 
+	if (key == GLFW_KEY_9 && action == GLFW_PRESS)
+	{
+		saveFrame();
+	}
+
+	// Reproducir Animación 
+	if (key == GLFW_KEY_0 && action == GLFW_PRESS)
+	{
+		if (play == false && (FrameIndex > 1))
+		{
+			printf("Reproduciendo animacion...\n");
+			resetElements();
+			interpolation();
+			play = true;
+			playIndex = 0;
+			current_animation_time = 0.0f;
+		}
+		else
+		{
+			play = false;
+		}
+	}
 }
 void Animation() {
-
+	rotHelice += 150.0f * deltaTime; //helice del avion
+	//Animación de las puertas
 	if (puerta1Abriendo) {
 		rotPuertaVidrio += velocidadAnimacion;
 		if (rotPuertaVidrio > 70.0f) rotPuertaVidrio = 70.0f;
@@ -1100,32 +1248,29 @@ void Animation() {
 		glm::vec3 toT = target - walk1Pos;
 		float distXZ = glm::length(glm::vec2(toT.x, toT.z));
 
-		// Yaw deseado (0°=+Z, +90°=+X)
+		//Yaw deseado (0°=+Z, +90°=+X)
 		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
 
-		// Diferencia angular mínima en [-180,180]
+		//Diferencia angular mínima en [-180,180]
 		float diff = desiredYaw - walk1Yaw;
 		while (diff > 180.0f)  diff -= 360.0f;
 		while (diff < -180.0f) diff += 360.0f;
 
-		// Giro progresivo
+		//Giro progresivo
 		float maxStep = walk1TurnSpeed * deltaTime;
 		if (std::abs(diff) > maxStep) walk1Yaw += (diff > 0 ? maxStep : -maxStep);
 		else                          walk1Yaw = desiredYaw;
 
-		// Avanza si ya está casi alineado
 		if (std::abs(diff) < walk1FaceEps) {
 			float yaw = glm::radians(walk1Yaw);
 			glm::vec3 fwd(std::sin(yaw), 0.0f, std::cos(yaw));
 			walk1Pos += fwd * (walk1Speed * deltaTime);
 		}
 
-		// ¿Llegó al waypoint?
 		if (distXZ < walk1ArriveEps) {
 			int prev = walk1Wp;
 			walk1Wp = (walk1Wp + 1) % 4;
 
-			// Cerró el lazo: limpia drift y normaliza yaw
 			if (prev == 3 && walk1Wp == 0) {
 				walk1Pos = glm::vec3(0.0f);
 				while (walk1Yaw > 180.0f)  walk1Yaw -= 360.0f;
@@ -1141,27 +1286,25 @@ void Animation() {
 		glm::vec3 toT = target - walk2Pos;
 		float distXZ = glm::length(glm::vec2(toT.x, toT.z));
 
-		// Yaw deseado hacia el objetivo (0°=+Z, +90°=+X)
+		//Yaw deseado hacia el objetivo (0°=+Z, +90°=+X)
 		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
 
-		// Diferencia angular mínima en [-180,180]
+		//Diferencia angular mínima en [-180,180]
 		float diff = desiredYaw - walk2Yaw;
 		while (diff > 180.0f) diff -= 360.0f;
 		while (diff < -180.0f) diff += 360.0f;
 
-		// Giro progresivo limitado por turnSpeed
+		//Giro progresivo limitado por turnSpeed
 		float maxStep = walk2TurnSpeed * deltaTime;
 		if (std::abs(diff) > maxStep) walk2Yaw += (diff > 0 ? maxStep : -maxStep);
 		else                          walk2Yaw = desiredYaw;
 
-		// Avanza solo si está casi alineado
 		if (std::abs(diff) < walk2FaceEps) {
 			float yaw = glm::radians(walk2Yaw);
 			glm::vec3 fwd(std::sin(yaw), 0.0f, std::cos(yaw));
 			walk2Pos += fwd * (walk2Speed * deltaTime);
 		}
 
-		// ¿Llegó?
 		if (distXZ < walk2ArriveEps) {
 			int prev = walk2Wp;
 			walk2Wp = (walk2Wp + 1) % 6;
@@ -1191,6 +1334,44 @@ void Animation() {
 			animBaseball = false;
 		}
 	}
+
+	if (play)
+	{
+		if (current_animation_time >= total_animation_time)
+		{
+
+			avionPos.x = KeyFrame[playIndex + 1].avionPosX;
+			avionPos.y = KeyFrame[playIndex + 1].avionPosY;
+			avionPos.z = KeyFrame[playIndex + 1].avionPosZ;
+			avionRoll = KeyFrame[playIndex + 1].avionRoll;
+			avionRot = KeyFrame[playIndex + 1].avionRot;
+
+			playIndex++;
+
+			if (playIndex > FrameIndex - 2)
+			{
+				printf("Termina animacion\n");
+				playIndex = 0;
+				play = false;
+			}
+			else
+			{
+				current_animation_time = 0.0f;
+				interpolation();
+			}
+		}
+		else
+		{
+
+			avionPos.x += KeyFrame[playIndex].incX * deltaTime;
+			avionPos.y += KeyFrame[playIndex].incY * deltaTime;
+			avionPos.z += KeyFrame[playIndex].incZ * deltaTime;
+			avionRoll += KeyFrame[playIndex].incRoll * deltaTime;
+			avionRot += KeyFrame[playIndex].incRot * deltaTime;
+
+			current_animation_time += deltaTime;
+		}
+	}
 }
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
@@ -1211,3 +1392,40 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 	camera.ProcessMouseMovement(xOffset, yOffset);
 }
 
+
+// Funciones de keyframes
+void saveFrame(void)
+{
+	if (FrameIndex < MAX_FRAMES)
+	{
+		printf("Guardando KeyFrame %d\n", FrameIndex);
+		KeyFrame[FrameIndex].avionPosX = avionPos.x;
+		KeyFrame[FrameIndex].avionPosY = avionPos.y;
+		KeyFrame[FrameIndex].avionPosZ = avionPos.z;
+		KeyFrame[FrameIndex].avionRoll = avionRoll;
+		KeyFrame[FrameIndex].avionRot = avionRot;
+		FrameIndex++;
+	}
+	else
+	{
+		printf("Arreglo de KeyFrames lleno\n");
+	}
+}
+
+void resetElements(void)
+{
+	avionPos.x = KeyFrame[0].avionPosX;
+	avionPos.y = KeyFrame[0].avionPosY;
+	avionPos.z = KeyFrame[0].avionPosZ;
+	avionRoll = KeyFrame[0].avionRoll;
+	avionRot = KeyFrame[0].avionRot;
+}
+
+void interpolation(void)
+{
+	KeyFrame[playIndex].incX = (KeyFrame[playIndex + 1].avionPosX - KeyFrame[playIndex].avionPosX) / total_animation_time;
+	KeyFrame[playIndex].incY = (KeyFrame[playIndex + 1].avionPosY - KeyFrame[playIndex].avionPosY) / total_animation_time;
+	KeyFrame[playIndex].incZ = (KeyFrame[playIndex + 1].avionPosZ - KeyFrame[playIndex].avionPosZ) / total_animation_time;
+	KeyFrame[playIndex].incRoll = (KeyFrame[playIndex + 1].avionRoll - KeyFrame[playIndex].avionRoll) / total_animation_time;
+	KeyFrame[playIndex].incRot = (KeyFrame[playIndex + 1].avionRot - KeyFrame[playIndex].avionRot) / total_animation_time;
+}
