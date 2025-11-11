@@ -36,6 +36,9 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 void Animation();
+void saveFrame(void);
+void resetElements(void);
+void interpolation(void);
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -78,6 +81,37 @@ bool animBaseball = false;
 bool playingThrow = false;
 float throwTime = 0.0f;
 const float throwLaunchOffset = 0.0f;
+
+// avion con keyframes
+float rotHelice = 0.0f; 
+glm::vec3 avionPos = glm::vec3(2.0f, 10.0f, 0.0f); 
+float avionRoll = 0.0f;  
+float avionSpeed = 3.0f; 
+float avionRot = 0.0f;
+
+#define MAX_FRAMES 20  
+float total_animation_time = 1.5f; 
+float current_animation_time = 0.0f;
+
+typedef struct _frame {
+	float avionPosX;
+	float avionPosY;
+	float avionPosZ;
+	float avionRoll;
+	float avionRot;
+
+	float incX;
+	float incY;
+	float incZ;
+	float incRoll;
+	float incRot;
+
+} FRAME;
+
+FRAME KeyFrame[MAX_FRAMES]; // arreglo de keyframes
+int FrameIndex = 0;       
+bool play = false;         
+int playIndex = 0;        
 
 float vertices[] = {
 	 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -199,7 +233,6 @@ glm::vec3 cubePositions[] = {
 // Audio
 ma_engine gAudio;          // motor global
 bool gAudioReady = false;  // bandera
-
 
 glm::vec3 Light1 = glm::vec3(0);
 //Anim
@@ -357,6 +390,24 @@ int main()
 	Model Baseball((char*)"Models/Baseball/Baseball.obj");
 	Model Moon((char*)"Models/Moon/Moon.obj");
 
+	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
+	Birds.initShaders(animShader.Program);
+
+	ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
+	Bat.initShaders(animShader.Program);
+
+	//Pinturas
+	Model Pintura1((char*)"Models/Pinturas/Pintura1.obj");
+	Model Pintura2((char*)"Models/Pinturas/Pintura2.obj");
+	Model Pintura3((char*)"Models/Pinturas/Pintura3.obj");
+	Model Pintura4((char*)"Models/Pinturas/Pintura4.obj");
+	Model Pintura5((char*)"Models/Pinturas/Pintura5.obj");
+	Model Pintura6((char*)"Models/Pinturas/Pintura6.obj");
+	Model Pintura7((char*)"Models/Pinturas/Pintura7.obj");
+	Model Pintura8((char*)"Models/Pinturas/Pintura8.obj");
+	Model Pintura9((char*)"Models/Pinturas/Pintura9.obj");
+	Model Pintura10((char*)"Models/Pinturas/Pintura10.obj");
+	Model Pintura11((char*)"Models/Pinturas/Pintura11.obj");
 
 	//Modelos de Miximo
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
@@ -399,6 +450,25 @@ int main()
 	Model BotonC((char*)"Models/Pinturas/boton_c.obj");
 	Model BotonV((char*)"Models/Pinturas/boton_v.obj");
 
+	
+	// Avion y frames
+	Model avion_cuerpo((char*)"Models/avion/avion_cuerpo.obj");
+	Model avion_helice((char*)"Models/avion/avion_helice1.obj");
+	for (int i = 0; i < MAX_FRAMES; i++)
+	{
+		KeyFrame[i].avionPosX = 0;
+		KeyFrame[i].avionPosY = 0;
+		KeyFrame[i].avionPosZ = 0;
+		KeyFrame[i].avionRoll = 0;
+		KeyFrame[i].avionRot = 0;
+		KeyFrame[i].incX = 0;
+		KeyFrame[i].incY = 0;
+		KeyFrame[i].incZ = 0;
+		KeyFrame[i].incRoll = 0;
+		KeyFrame[i].incRot = 0;
+	}
+
+
 	// First, set the container's VAO (and VBO)
 	GLuint VBO, VAO;
 	glGenVertexArrays(1, &VAO);
@@ -415,6 +485,7 @@ int main()
 
 	// Set texture units
 	lightingShader.Use();
+	glUniform1i(glGetUniformLocation(lightingShader.Program, "useSolidColor"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.specular"), 1);
 
@@ -785,6 +856,27 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		BotonV.Draw(lightingShader);
 
+		//avion
+		lightingShader.Use();
+		modelLoc = glGetUniformLocation(lightingShader.Program, "model");
+		model = glm::mat4(1.0f);
+
+		model = glm::translate(model, avionPos);
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(180.0f + avionRot), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(avionRoll), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.08f, 0.08f, 0.08f));
+
+		modelTemp = model;
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		avion_cuerpo.Draw(lightingShader);
+		model = modelTemp; 
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.5f)); 
+		
+		//model = glm::rotate(model, glm::radians(rotHelice), glm::vec3(0.0f, 0.0f, 1.0f)); no rota sobre su propio eje
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		avion_helice.Draw(lightingShader);
+
 		glBindVertexArray(0);
 
 
@@ -843,6 +935,8 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Birds.Draw(animShader);
 		glBindVertexArray(0);
+
+
 
 		//glEnable(GL_CULL_FACE);
 
@@ -973,7 +1067,53 @@ void DoMovement()
 	}*/
 	if (keys[GLFW_KEY_K]) walk2Run = !walk2Run;
 	if (keys[GLFW_KEY_L]) walk1Run = !walk1Run;
+	
+	if (!play)
+	{
+		float targetRoll = 0.0f;
+		float rollSpeed = 7.0f;
+		float maxRoll = 20.0f;
 
+		if (keys[GLFW_KEY_KP_4])
+		{
+			avionPos.x -= avionSpeed * deltaTime;
+			targetRoll = maxRoll;
+		}
+		if (keys[GLFW_KEY_KP_6])
+		{
+			avionPos.x += avionSpeed * deltaTime;
+			targetRoll = -maxRoll;
+		}
+		if (keys[GLFW_KEY_KP_8])
+		{
+			avionPos.z -= avionSpeed * deltaTime;
+		}
+		if (keys[GLFW_KEY_KP_5])
+		{
+			avionPos.z += avionSpeed * deltaTime;
+		}
+		if (keys[GLFW_KEY_KP_9])
+		{
+			avionPos.y += avionSpeed * deltaTime;
+		}
+		if (keys[GLFW_KEY_KP_7])
+		{
+			avionPos.y -= avionSpeed * deltaTime;
+		}
+		avionRoll += (targetRoll - avionRoll) * rollSpeed * deltaTime;
+
+		float yawSpeed = 80.0f; // Grados por segundo (ajústalo)
+
+		if (keys[GLFW_KEY_1])
+		{
+			avionRot += yawSpeed * deltaTime;
+		}
+		// Girar Derecha (Tecla '2')
+		if (keys[GLFW_KEY_2])
+		{
+			avionRot -= yawSpeed * deltaTime;
+		}
+	}
 
 
 }
@@ -1067,9 +1207,32 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		puerta1Abriendo = false; puerta1Cerrando = true;
 		puerta2Abriendo = false; puerta2Cerrando = true;
 	}
+	
+	if (key == GLFW_KEY_KP_1 && action == GLFW_PRESS)
+	{
+		saveFrame();
+	}
 
+	// Reproducir Animación 
+	if (key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
+	{
+		if (play == false && (FrameIndex > 1)) 
+		{
+			printf("Reproduciendo animacion...\n");
+			resetElements();     
+			interpolation();      
+			play = true;         
+			playIndex = 0;
+			current_animation_time = 0.0f;
+		}
+		else 
+		{
+			play = false;
+		}
+	}
 }
 void Animation() {
+	rotHelice += 150.0f * deltaTime; //helice del avion
 	//Animación de las puertas
 	if (puerta1Abriendo) {
 		rotPuertaVidrio += velocidadAnimacion;
@@ -1188,6 +1351,44 @@ void Animation() {
 			animBaseball = false;
 		}
 	}
+
+	if (play)
+	{
+		if (current_animation_time >= total_animation_time)
+		{
+
+			avionPos.x = KeyFrame[playIndex + 1].avionPosX;
+			avionPos.y = KeyFrame[playIndex + 1].avionPosY;
+			avionPos.z = KeyFrame[playIndex + 1].avionPosZ;
+			avionRoll = KeyFrame[playIndex + 1].avionRoll;
+			avionRot = KeyFrame[playIndex + 1].avionRot;
+
+			playIndex++;
+
+			if (playIndex > FrameIndex - 2)
+			{
+				printf("Termina animacion\n");
+				playIndex = 0;
+				play = false;
+			}
+			else 
+			{
+				current_animation_time = 0.0f;
+				interpolation(); 
+			}
+		}
+		else
+		{
+
+			avionPos.x += KeyFrame[playIndex].incX * deltaTime;
+			avionPos.y += KeyFrame[playIndex].incY * deltaTime;
+			avionPos.z += KeyFrame[playIndex].incZ * deltaTime;
+			avionRoll += KeyFrame[playIndex].incRoll * deltaTime;
+			avionRot += KeyFrame[playIndex].incRot * deltaTime;
+
+			current_animation_time += deltaTime;
+		}
+	}
 }
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
@@ -1206,4 +1407,42 @@ void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 	lastY = yPos;
 
 	camera.ProcessMouseMovement(xOffset, yOffset);
+}
+
+
+// Funciones de keyframes
+void saveFrame(void)
+{
+	if (FrameIndex < MAX_FRAMES)
+	{
+		printf("Guardando KeyFrame %d\n", FrameIndex);
+		KeyFrame[FrameIndex].avionPosX = avionPos.x;
+		KeyFrame[FrameIndex].avionPosY = avionPos.y;
+		KeyFrame[FrameIndex].avionPosZ = avionPos.z;
+		KeyFrame[FrameIndex].avionRoll = avionRoll;
+		KeyFrame[FrameIndex].avionRot = avionRot;
+		FrameIndex++;
+	}
+	else
+	{
+		printf("Arreglo de KeyFrames lleno\n");
+	}
+}
+
+void resetElements(void)
+{
+	avionPos.x = KeyFrame[0].avionPosX;
+	avionPos.y = KeyFrame[0].avionPosY;
+	avionPos.z = KeyFrame[0].avionPosZ;
+	avionRoll = KeyFrame[0].avionRoll;
+	avionRot = KeyFrame[0].avionRot;
+}
+
+void interpolation(void)
+{
+	KeyFrame[playIndex].incX = (KeyFrame[playIndex + 1].avionPosX - KeyFrame[playIndex].avionPosX) / total_animation_time;
+	KeyFrame[playIndex].incY = (KeyFrame[playIndex + 1].avionPosY - KeyFrame[playIndex].avionPosY) / total_animation_time;
+	KeyFrame[playIndex].incZ = (KeyFrame[playIndex + 1].avionPosZ - KeyFrame[playIndex].avionPosZ) / total_animation_time;
+	KeyFrame[playIndex].incRoll = (KeyFrame[playIndex + 1].avionRoll - KeyFrame[playIndex].avionRoll) / total_animation_time;
+	KeyFrame[playIndex].incRot = (KeyFrame[playIndex + 1].avionRot - KeyFrame[playIndex].avionRot) / total_animation_time;
 }
