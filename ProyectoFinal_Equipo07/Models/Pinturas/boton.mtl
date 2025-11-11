@@ -12,5 +12,5 @@ newmtl Material__146
 	Kd 0.5880 0.5880 0.5880
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka C:\Users\gabir\Desktop\imagenes museum\boton.jpg
-	map_Kd C:\Users\gabir\Desktop\imagenes museum\boton.jpg
+	map_Ka boton.jpg
+	map_Kd boton.jpg
