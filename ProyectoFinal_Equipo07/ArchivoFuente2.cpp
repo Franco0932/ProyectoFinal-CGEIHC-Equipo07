@@ -51,15 +51,15 @@ GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
 // Light attributes
-glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+glm::vec3 lightPos(0.0f, 4.5f, 0.0f);
 bool active;
 
 // Positions of the point lights
 glm::vec3 pointLightPositions[] = {
-	glm::vec3(0.0f,2.0f, 0.0f),
-	glm::vec3(0.0f,0.0f, 0.0f),
-	glm::vec3(0.0f,0.0f,  0.0f),
-	glm::vec3(0.0f,0.0f, 0.0f)
+	glm::vec3(0.0f,5.0f, 0.0f),
+	glm::vec3(2.0f,2.0f, 0.0f),
+	glm::vec3(4.0f,4.0f,  0.0f),
+	glm::vec3(3.0f,3.0f, 0.0f)
 };
 
 float movelightPos = 0.0f;
@@ -67,7 +67,6 @@ float movelightPos2 = 0.0f;
 float angleX = 0.0f;
 float angleY = 0.0f;
 float radius = 30.0f; //órbita de la luz
-bool DiaNoche = true; //true = dia, false = noche
 float rot = 0.0f;
 bool activanim = false;
 
@@ -83,14 +82,14 @@ float throwTime = 0.0f;
 const float throwLaunchOffset = 0.0f;
 
 // avion con keyframes
-float rotHelice = 0.0f; 
-glm::vec3 avionPos = glm::vec3(2.0f, 10.0f, 0.0f); 
-float avionRoll = 0.0f;  
-float avionSpeed = 3.0f; 
+float rotHelice = 0.0f;
+glm::vec3 avionPos = glm::vec3(2.0f, 10.0f, 0.0f);
+float avionRoll = 0.0f;
+float avionSpeed = 3.0f;
 float avionRot = 0.0f;
 
 #define MAX_FRAMES 20  
-float total_animation_time = 1.5f; 
+float total_animation_time = 1.5f;
 float current_animation_time = 0.0f;
 
 typedef struct _frame {
@@ -109,9 +108,9 @@ typedef struct _frame {
 } FRAME;
 
 FRAME KeyFrame[MAX_FRAMES]; // arreglo de keyframes
-int FrameIndex = 0;       
-bool play = false;         
-int playIndex = 0;        
+int FrameIndex = 0;
+bool play = false;
+int playIndex = 0;
 
 float vertices[] = {
 	 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -234,6 +233,7 @@ glm::vec3 cubePositions[] = {
 ma_engine gAudio;          // motor global
 bool gAudioReady = false;  // bandera
 
+
 glm::vec3 Light1 = glm::vec3(0);
 //Anim
 float rotBall = 0.0f;
@@ -256,7 +256,7 @@ glm::vec3 centroVuelo = glm::vec3(2.0f, 8.0f, 0.0f);
 
 
 //Walk1
-bool walk1Run = true;
+bool walk1Run = false;
 glm::vec3 walk1Origin = glm::vec3(-3.5f, 0.0f, -12.5f); // donde ya lo dibujabas
 
 glm::vec3 walk1Pos(0.0f);
@@ -282,8 +282,8 @@ float walk1FaceEps = 2.0f;     // cuán alineado debe estar para avanzar
 
 
 //Walk2
-bool walk2Run = true;
-glm::vec3 walk2Origin = glm::vec3(7.0f, 0.0f, 6.0f); // donde lo colocas en escena
+bool walk2Run = false;
+glm::vec3 walk2Origin = glm::vec3(7.0f, 0.0f, 6.0f);
 
 glm::vec3 walk2Pos(0.0f); // posición relativa al origin
 float     walk2Yaw = 0.0f; // 0° = +Z
@@ -308,15 +308,15 @@ float walk2FaceEps = 2.0f;    // “casi” alineado
 
 
 //Animación de apertura/cierre de la puerta
-float speed = 30.0f; // Ajusta la velocidad de la rotación
+float speed = 50.0f;
 float speed2 = 1.0f;
 float tiempo = glfwGetTime() * speed2;
 bool puerta1Abriendo = false;
 bool puerta1Cerrando = false;
 bool puerta2Abriendo = false;
 bool puerta2Cerrando = false;
-float rotPuertaVidrio = 0.0f;  // Ángulo de rotación inicial de la puerta 1
-float rotPuertaVidrio2 = 0.0f; // Ángulo de rotación inicial de la puerta 2
+float rotPuertaVidrio = 0.0f;
+float rotPuertaVidrio2 = 0.0f;
 float velocidadAnimacion = 0.3f;
 
 // Deltatime
@@ -390,25 +390,6 @@ int main()
 	Model Baseball((char*)"Models/Baseball/Baseball.obj");
 	Model Moon((char*)"Models/Moon/Moon.obj");
 
-	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
-	Birds.initShaders(animShader.Program);
-
-	ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
-	Bat.initShaders(animShader.Program);
-
-	//Pinturas
-	Model Pintura1((char*)"Models/Pinturas/Pintura1.obj");
-	Model Pintura2((char*)"Models/Pinturas/Pintura2.obj");
-	Model Pintura3((char*)"Models/Pinturas/Pintura3.obj");
-	Model Pintura4((char*)"Models/Pinturas/Pintura4.obj");
-	Model Pintura5((char*)"Models/Pinturas/Pintura5.obj");
-	Model Pintura6((char*)"Models/Pinturas/Pintura6.obj");
-	Model Pintura7((char*)"Models/Pinturas/Pintura7.obj");
-	Model Pintura8((char*)"Models/Pinturas/Pintura8.obj");
-	Model Pintura9((char*)"Models/Pinturas/Pintura9.obj");
-	Model Pintura10((char*)"Models/Pinturas/Pintura10.obj");
-	Model Pintura11((char*)"Models/Pinturas/Pintura11.obj");
-
 	//Modelos de Miximo
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
 	Niño.initShaders(animShader.Program);
@@ -419,6 +400,9 @@ int main()
 
 	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
 	Birds.initShaders(animShader.Program);
+
+
+
 	/*ModelAnim Bat((char*)"Models/bat/source/Sketchfab_2023_10_26_02_42_48.fbx");
 	Bat.initShaders(animShader.Program);*/
 
@@ -431,6 +415,7 @@ int main()
 	Model Pintura11((char*)"Models/Pinturas/Pintura11.obj");
 	Model BotonZ((char*)"Models/Pinturas/boton.obj");
 	Model BotonX((char*)"Models/Pinturas/boton_x.obj");
+	Model Lampara1((char*)"Models/Lamparas/Lampara1.obj");
 
 	//Pinturas Sala2
 	Model Pintura2((char*)"Models/Pinturas/Pintura2.obj");
@@ -438,8 +423,9 @@ int main()
 	Model Pintura4((char*)"Models/Pinturas/Pintura3.obj");
 	Model Pintura3((char*)"Models/Pinturas/Pintura4.obj");
 	Model Pintura5((char*)"Models/Pinturas/Pintura5.obj");
-	Model BotonB((char*)"Models/Pinturas/boton_b.obj");
-	Model BotonN((char*)"Models/Pinturas/boton_n.obj");
+	Model BotonC((char*)"Models/Pinturas/boton_c.obj");
+	Model BotonV((char*)"Models/Pinturas/boton_v.obj");
+	Model Lampara2((char*)"Models/Lamparas/Lampara2.obj");
 
 	//Patio
 	Model PinturaPatio1((char*)"Models/Pinturas/Pintura1P.obj");
@@ -447,10 +433,10 @@ int main()
 	Model PinturaPatio3((char*)"Models/Pinturas/Pintura3P.obj");
 	Model LogoPatio((char*)"Models/Pinturas/LogoH.obj");
 	Model LogoPuerta((char*)"Models/Pinturas/Logo.obj");
-	Model BotonC((char*)"Models/Pinturas/boton_c.obj");
-	Model BotonV((char*)"Models/Pinturas/boton_v.obj");
+	Model BotonB((char*)"Models/Pinturas/boton_b.obj");
+	Model BotonN((char*)"Models/Pinturas/boton_n.obj");
+	Model Lampara3((char*)"Models/Lamparas/Lampara3.obj");
 
-	
 	// Avion y frames
 	Model avion_cuerpo((char*)"Models/avion/avion_cuerpo.obj");
 	Model avion_helice((char*)"Models/avion/avion_helice1.obj");
@@ -521,24 +507,24 @@ int main()
 	}
 
 	// Walk1
-	walk1Pos = glm::vec3(0.0f);
-	{
-		glm::vec3 toT = walk1Pts[0] - walk1Pos;
-		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
-		walk1Yaw = desiredYaw;
-		walk1Wp = 0;
-		walk1Run = true;
-	}
+	//walk1Pos = glm::vec3(0.0f);
+	//{
+	//	glm::vec3 toT = walk1Pts[0] - walk1Pos;
+	//	float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
+	//	walk1Yaw = desiredYaw;
+	//	walk1Wp = 0;
+	//	walk1Run = true;
+	//}
 
-	// Walk2
-	walk2Pos = glm::vec3(0.0f);
-	{
-		glm::vec3 toT = walk2Pts[0] - walk2Pos;
-		float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
-		walk2Yaw = desiredYaw;
-		walk2Wp = 0;
-		walk2Run = true;
-	}
+	//// Walk2
+	//walk2Pos = glm::vec3(0.0f);
+	//{
+	//	glm::vec3 toT = walk2Pts[0] - walk2Pos;
+	//	float desiredYaw = glm::degrees(std::atan2(toT.x, toT.z));
+	//	walk2Yaw = desiredYaw;
+	//	walk2Wp = 0;
+	//	walk2Run = true;
+	//}
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -555,7 +541,8 @@ int main()
 		Animation();
 
 		// Clear the colorbuffer
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.06f, 0.06f, 0.10f, 1.0f);
+		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// OpenGL options
@@ -580,33 +567,47 @@ int main()
 		lightPos.x = radius * sin(angleY);
 
 		// Directional light
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.3f, 0.3f, 0.3f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.15f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.06f, 0.07f, 0.10f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.18f, 0.22f, 0.30f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.20f, 0.22f, 0.30f);
 
 
-		// Point light 1
-		glm::vec3 lightColor;
-		lightColor.x = abs(sin(glfwGetTime() * Light1.x));
-		lightColor.y = abs(sin(glfwGetTime() * Light1.y));
-		lightColor.z = sin(glfwGetTime() * Light1.z);
+		//// Point light 1
+		//glm::vec3 lightColor;
+		//lightColor.x = abs(sin(glfwGetTime() * Light1.x));
+		//lightColor.y = abs(sin(glfwGetTime() * Light1.y));
+		//lightColor.z = sin(glfwGetTime() * Light1.z);
 
+		//Moon point light
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), 0.2f, 0.3f, 0.5f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), 0.4f, 0.6f, 0.8f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 0.4f, 0.5f, 0.9f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), 0.02f, 0.03f, 0.06f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), 0.10f, 0.14f, 0.22f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 0.16f, 0.18f, 0.26f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.018f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.0012f);
 
-		/*glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), lightColor.x, lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightColor.x, lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 1.0f, 0.2f, 0.2f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);*/
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"), 1.0f, 0.0f, 0.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].diffuse"), 1.0f, 0.0f, 0.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].specular"), 1.0f, 0.2f, 0.2f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.045f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.075f);
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].ambient"), 0.0f, 1.0f, 0.0f);  // Verde
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].diffuse"), 0.0f, 1.0f, 0.0f);  // Verde
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].specular"), 0.2f, 1.0f, 0.2f); // Specular verde
+
+
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].position"), pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].ambient"), 0.0f, 0.0f, 1.0f);  // Azul
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].diffuse"), 0.0f, 0.0f, 1.0f);  // Azul
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].specular"), 0.2f, 0.2f, 1.0f); // Specular azul
+
 
 
 		// SpotLight
@@ -623,12 +624,10 @@ int main()
 
 
 		// Set material properties
-
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0.3f, 0.3f, 0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"), 0.6f, 0.6f, 0.6f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 0.2f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 5.0f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"), 0.07f, 0.07f, 0.07f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0.35f, 0.35f, 0.35f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"), 0.40f, 0.40f, 0.40f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 24.0f);
 
 		// Create camera transformations
 		glm::mat4 view;
@@ -695,8 +694,8 @@ int main()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-45.771f, 6.833f, -34.167f));
 		model = glm::rotate(model, glm::radians(rotPuertaVidrio), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1050);
 		PuertasPrincipalesDer.Draw(lightingShader);
@@ -706,10 +705,10 @@ int main()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-45.876f, 7.659f, -50.525f));
 		model = glm::rotate(model, glm::radians(rotPuertaVidrio2), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1050);
+		//Desactiva el canal alfa 
 		PuertasPrincipalesIzq.Draw(lightingShader);
 		glDisable(GL_BLEND);
 
@@ -770,6 +769,12 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		BotonX.Draw(lightingShader);
 
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Lampara1.Draw(lightingShader);
+
 		//Sala2
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
@@ -803,7 +808,7 @@ int main()
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(1.6f, 0.5f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		BotonB.Draw(lightingShader);
 
@@ -812,6 +817,13 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		BotonN.Draw(lightingShader);
+
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.2f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Lampara2.Draw(lightingShader);
+
 
 		//Patio
 		model = glm::mat4(1);
@@ -846,7 +858,7 @@ int main()
 
 		model = glm::mat4(1);
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(0.f, 0.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		BotonC.Draw(lightingShader);
 
@@ -856,6 +868,12 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		BotonV.Draw(lightingShader);
 
+		//Luz de la  puerta
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Lampara3.Draw(lightingShader);
 		//avion
 		lightingShader.Use();
 		modelLoc = glGetUniformLocation(lightingShader.Program, "model");
@@ -870,9 +888,9 @@ int main()
 		modelTemp = model;
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		avion_cuerpo.Draw(lightingShader);
-		model = modelTemp; 
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.5f)); 
-		
+		model = modelTemp;
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.5f));
+
 		//model = glm::rotate(model, glm::radians(rotHelice), glm::vec3(0.0f, 0.0f, 1.0f)); no rota sobre su propio eje
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		avion_helice.Draw(lightingShader);
@@ -894,9 +912,9 @@ int main()
 
 		glUniform3f(glGetUniformLocation(animShader.Program, "material.specular"), 0.5f, 0.5f, 0.5f);
 		glUniform1f(glGetUniformLocation(animShader.Program, "material.shininess"), 32.0f);
-		glUniform3f(glGetUniformLocation(animShader.Program, "light.ambient"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(animShader.Program, "light.diffuse"), 0.06, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(animShader.Program, "light.specular"), 0.5f, 0.5f, 0.5f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.ambient"), 0.15f, 0.15f, 0.18f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.diffuse"), 0.35f, 0.35f, 0.45f);
+		glUniform3f(glGetUniformLocation(animShader.Program, "light.specular"), 0.30f, 0.30f, 0.35f);
 		glUniform3f(glGetUniformLocation(animShader.Program, "light.direction"), 0.0f, -1.0f, -1.0f);
 		view = camera.GetViewMatrix();
 
@@ -963,17 +981,34 @@ int main()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 		model = glm::mat4(1);
-		model = glm::translate(model, lightPos);
+		model = glm::translate(model, lightPos + movelightPos);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAO);
+		Moon.Draw(lightingShader);
 		// Draw the light object (using light's vertex attributes)
 
 		model = glm::mat4(1);
-		model = glm::translate(model, pointLightPositions[0]);
+		model = glm::translate(model, pointLightPositions[1]);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//Moon.Draw(lampShader);
+
+		model = glm::mat4(1);
+		model = glm::translate(model, pointLightPositions[2]);
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glBindVertexArray(VAO);
 		Moon.Draw(lampShader);
+
+		model = glm::mat4(1);
+		model = glm::translate(model, pointLightPositions[3]);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
 
@@ -1041,13 +1076,13 @@ void DoMovement()
 
 	if (keys[GLFW_KEY_T])
 	{
-		angleY += 0.5f;
+		angleY += 0.05f;
 	}
-	/*if (keys[GLFW_KEY_G])
+	if (keys[GLFW_KEY_G])
 	{
-		pointLightPositions[0].x -= 0.1f;
+		angleY -= 0.05f;
 	}
-
+	/*
 	if (keys[GLFW_KEY_Y])
 	{
 		pointLightPositions[0].y += 0.01f;
@@ -1064,10 +1099,11 @@ void DoMovement()
 	if (keys[GLFW_KEY_J])
 	{
 		pointLightPositions[0].z += 0.01f;
-	}*/
+	}
+	*/
 	if (keys[GLFW_KEY_K]) walk2Run = !walk2Run;
 	if (keys[GLFW_KEY_L]) walk1Run = !walk1Run;
-	
+
 	if (!play)
 	{
 		float targetRoll = 0.0f;
@@ -1138,7 +1174,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		}
 	}
 
-	if (keys[GLFW_KEY_SPACE])
+	/*if (keys[GLFW_KEY_SPACE])
 	{
 		active = !active;
 		if (active)
@@ -1150,7 +1186,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		{
 			Light1 = glm::vec3(0);
 		}
-	}
+	}*/
 	if (keys[GLFW_KEY_P]) {
 
 		animBaseball ^= true;
@@ -1158,7 +1194,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 	if (keys[GLFW_KEY_R]) {
 		walk2Pos = glm::vec3(0.0f);
-		walk2Yaw = 0.0f;   // o cualquier otro para ver el primer giro suave
+		walk2Yaw = 0.0f;
 		walk2Wp = 0;
 		walk2Run = true;
 	}
@@ -1198,6 +1234,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
 		}
 	}
+
 	//Puerta
 	if (key == GLFW_KEY_F && action == GLFW_PRESS) {
 		puerta1Abriendo = true;  puerta1Cerrando = false;
@@ -1207,25 +1244,25 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		puerta1Abriendo = false; puerta1Cerrando = true;
 		puerta2Abriendo = false; puerta2Cerrando = true;
 	}
-	
-	if (key == GLFW_KEY_KP_1 && action == GLFW_PRESS)
+
+	if (key == GLFW_KEY_9 && action == GLFW_PRESS)
 	{
 		saveFrame();
 	}
 
 	// Reproducir Animación 
-	if (key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
+	if (key == GLFW_KEY_0 && action == GLFW_PRESS)
 	{
-		if (play == false && (FrameIndex > 1)) 
+		if (play == false && (FrameIndex > 1))
 		{
 			printf("Reproduciendo animacion...\n");
-			resetElements();     
-			interpolation();      
-			play = true;         
+			resetElements();
+			interpolation();
+			play = true;
 			playIndex = 0;
 			current_animation_time = 0.0f;
 		}
-		else 
+		else
 		{
 			play = false;
 		}
@@ -1371,10 +1408,10 @@ void Animation() {
 				playIndex = 0;
 				play = false;
 			}
-			else 
+			else
 			{
 				current_animation_time = 0.0f;
-				interpolation(); 
+				interpolation();
 			}
 		}
 		else
