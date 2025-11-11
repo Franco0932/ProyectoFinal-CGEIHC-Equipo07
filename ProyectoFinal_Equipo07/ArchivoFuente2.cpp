@@ -389,6 +389,7 @@ int main()
 	Model Pasto((char*)"Models/Pasto/Pasto.obj");
 	Model Baseball((char*)"Models/Baseball/Baseball.obj");
 	Model Moon((char*)"Models/Moon/Moon.obj");
+	Model Globos((char*)"Models/Globos/Globo.obj");
 
 	//Modelos de Miximo
 	ModelAnim Niño((char*)"Models/Throw/Throw.dae");
@@ -397,6 +398,8 @@ int main()
 	Walk1.initShaders(animShader.Program);
 	ModelAnim Walk2((char*)"Models/Walking2/Walking.dae");
 	Walk2.initShaders(animShader.Program);
+	ModelAnim Don((char*)"Models/Globos/Box Idle.dae");
+	Don.initShaders(animShader.Program);
 
 	ModelAnim Birds((char*)"Models/Birds/bird.fbx");
 	Birds.initShaders(animShader.Program);
@@ -479,12 +482,13 @@ int main()
 
 	// Load textures
 	vector<const GLchar*> faces;
-	faces.push_back("SkyBox/right.tga");
-	faces.push_back("SkyBox/left.tga");
-	faces.push_back("SkyBox/top.tga");
-	faces.push_back("SkyBox/bottom.tga");
 	faces.push_back("SkyBox/back.tga");
 	faces.push_back("SkyBox/front.tga");
+	faces.push_back("SkyBox/top.tga");
+	faces.push_back("SkyBox/bottom.tga");
+	faces.push_back("SkyBox/right.tga");
+	faces.push_back("SkyBox/left.tga");
+
 
 	GLuint cubemapTexture = TextureLoading::LoadCubemap(faces);
 
@@ -820,6 +824,12 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		LogoPuerta.Draw(lightingShader);
 
+		model = glm::mat4(1);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::translate(model, glm::vec3(-1.9, -5.6f, 4.5f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Globos.Draw(lightingShader);
+
 		//avion
 		lightingShader.Use();
 		modelLoc = glGetUniformLocation(lightingShader.Program, "model");
@@ -871,6 +881,11 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Niño.Draw(animShader);
 
+		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -1.0f));
+		model = glm::scale(model, glm::vec3(0.008f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		Don.Draw(animShader);
 
 		model = glm::mat4(1);
 		model = glm::translate(model, walk1Origin + walk1Pos);
