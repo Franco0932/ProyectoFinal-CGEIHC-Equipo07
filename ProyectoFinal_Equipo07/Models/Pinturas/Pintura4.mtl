@@ -13,4 +13,4 @@ newmtl Material__96
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
 	map_Ka imagen3.jpg
-	map_Kd Cimagen3.jpg
+	map_Kd imagen3.jpg
