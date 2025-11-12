@@ -430,7 +430,7 @@ int main()
 	Model LogoPuerta((char*)"Models/Pinturas/Logo.obj");
 
 	// Avion y frames
-	Model avion_cuerpo((char*)"Models/avion/avion_cuerpo.obj");
+	Model avion_cuerpo((char*)"Models/avion/avion_cuerpo - copia.obj");
 	Model avion_helice((char*)"Models/avion/avion_helice1.obj");
 	for (int i = 0; i < MAX_FRAMES; i++)
 	{
@@ -826,7 +826,7 @@ int main()
 		model = glm::mat4(1.0f);
 
 		model = glm::translate(model, avionPos);
-		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(180.0f + avionRot), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(avionRoll), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.08f, 0.08f, 0.08f));
@@ -837,7 +837,7 @@ int main()
 		model = modelTemp;
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.5f));
 
-		//model = glm::rotate(model, glm::radians(rotHelice), glm::vec3(0.0f, 0.0f, 1.0f)); no rota sobre su propio eje
+		//model = glm::rotate(model, glm::radians(rotHelice), glm::vec3(0.0f, 0.0f, 0.005f)); //no rota sobre su propio eje
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		avion_helice.Draw(lightingShader);
 
@@ -1172,12 +1172,12 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 	}
 	if (keys[GLFW_KEY_B]) {
 		if (gAudioReady) {
-			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+			ma_engine_play_sound(&gAudio, "Audio/Navegacion1.mp3", NULL);
 		}
 	}
 	if (keys[GLFW_KEY_N]) {
 		if (gAudioReady) {
-			ma_engine_play_sound(&gAudio, "Audio/Prueba.mp3", NULL);
+			ma_engine_play_sound(&gAudio, "Audio/GuerraYPaz.mp3", NULL);
 		}
 	}
 

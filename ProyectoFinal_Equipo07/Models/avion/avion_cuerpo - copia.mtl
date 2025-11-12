@@ -9,9 +9,10 @@ newmtl Material_001
 	Tf 1.0000 1.0000 1.0000 
 	illum 2
 	Ka 1.0000 1.0000 1.0000
-	Kd 0.9048 0.0886 0.0000
+	Kd 1.0000 1.0000 1.0000
 	Ks 0.5000 0.5000 0.5000
 	Ke 0.0000 0.0000 0.0000
+	map_Kd textura_avion_rojo.png
 
 newmtl Material_002
 	Ns 225.0000
@@ -24,6 +25,7 @@ newmtl Material_002
 	Kd 0.8000 0.1698 0.0000
 	Ks 0.5000 0.5000 0.5000
 	Ke 0.0000 0.0000 0.0000
+	map_Kd textura_azul_metal.png
 
 newmtl Material_003
 	Ns 225.0000
@@ -36,3 +38,4 @@ newmtl Material_003
 	Kd 0.6982 0.6982 0.6982
 	Ks 0.5000 0.5000 0.5000
 	Ke 0.0000 0.0000 0.0000
+        map_Kd textura_azul_vidrio.png
