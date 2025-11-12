@@ -319,6 +319,18 @@ float rotPuertaVidrio = 0.0f;
 float rotPuertaVidrio2 = 0.0f;
 float velocidadAnimacion = 0.3f;
 
+//Globos Variables
+bool  balloonFlying = false;
+float balloonElapsed = 0.0f;
+float balloonX = 0.0f;    //oscilación en X
+float balloonY = 0.0f;
+glm::vec3 globosBase = glm::vec3(-0.4f, -1.3f, 0.75f);
+float balloonAscentSpeed = 0.8f; 
+float balloonWindAmp = 0.6f;
+float balloonWindFreq = 1.2f;
+float balloonMaxYAbs = 40.0f;
+
+
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
@@ -882,9 +894,11 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara3.Draw(lightingShader);
+
 		model = glm::mat4(1);
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		model = glm::translate(model, glm::vec3(-1.9, -5.6f, 4.5f));
+		glm::vec3 balloonOffset(balloonX, balloonY, 0.0f);
+		model = glm::translate(model, globosBase + balloonOffset);
+		model = glm::scale(model, glm::vec3(0.2f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Globos.Draw(lightingShader);
 
@@ -1279,7 +1293,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		saveFrame();
 	}
 
-	// Reproducir Animación 
+	//Reproducir Animación 
 	if (key == GLFW_KEY_0 && action == GLFW_PRESS)
 	{
 		if (play == false && (FrameIndex > 1))
@@ -1296,6 +1310,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 			play = false;
 		}
 	}
+	//Globo
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
+		balloonFlying = true;
+		balloonElapsed = 0.0f;
+		balloonX = 0.0f;
+		balloonY = 0.0f;
+	}
+
 }
 void Animation() {
 	rotHelice += 150.0f * deltaTime; //helice del avion
@@ -1455,6 +1477,27 @@ void Animation() {
 			current_animation_time += deltaTime;
 		}
 	}
+
+	//Globos
+	if (balloonFlying) {
+		balloonElapsed += deltaTime;
+		float w = balloonWindFreq * balloonElapsed;
+		balloonX = balloonWindAmp * std::sin(w) + 0.15f * std::sin(0.37f * w + 1.1f);
+		balloonY = balloonAscentSpeed * balloonElapsed;
+		if (globosBase.y + balloonY >= balloonMaxYAbs) {
+			balloonFlying = false;
+			balloonElapsed = 0.0f;
+			balloonX = 0.0f;
+			balloonY = 0.0f;
+		}
+	}
+	else {
+		float idle = 0.02f * std::sin(glfwGetTime() * 1.8f);
+		balloonX = idle;
+		balloonY = 0.0f;
+	}
+
+
 }
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos)
